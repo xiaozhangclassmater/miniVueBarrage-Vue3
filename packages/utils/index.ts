@@ -8,3 +8,15 @@ export function withInstall<T extends Component> (options: T) {
   }
   return options
 }
+// 防抖函数
+export function debounce (fn:Function , waitTime: number) {
+  let timer: null | number = null
+  return (...args : any[]) => {
+    if(timer){
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      fn.apply(this , args)
+    }, waitTime);
+  }
+}

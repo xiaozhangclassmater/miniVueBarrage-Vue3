@@ -1,11 +1,13 @@
 <template>
-  <div id="app">
-    <miniVueBarrage/>
-  </div>
+  <router-view v-slot="{ Component }">
+    <KeepAlive>
+      <component :is="Component"></component>
+    </KeepAlive>
+  </router-view>
 </template>
 
 <script lang="ts" setup>
-import miniVueBarrage from '../packages';
+// import miniVueBarrage from '../packages';
 
 </script>
 
