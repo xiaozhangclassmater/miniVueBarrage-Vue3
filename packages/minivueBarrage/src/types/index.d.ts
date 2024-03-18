@@ -1,5 +1,9 @@
 interface miniVueBarrageProps {
-
+  barrages: Array<BarrageItem>,
+  barrageLineBlockHeight: number
+  barrageLineBlockCount: number
+  fullScreen: boolean
+  delay: number
 }
 
 export interface BarrageItem {
