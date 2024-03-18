@@ -1,12 +1,12 @@
 <template>
-  <miniVueBarrage :delay="1" />
+  <miniVueBarrage :barrages="barrages"/>
 </template>
 
 <script lang="ts" setup>
-import miniVueBarrage from '../../../packages';
+import miniVueBarrage from '../../../packages/components/minivueBarrage/src/index.vue';
 const barrages = [
   {
-    content: ''
+    content: '的撒好看的'
   }
 ]
 </script>

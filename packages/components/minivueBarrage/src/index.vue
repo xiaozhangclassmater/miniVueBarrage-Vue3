@@ -63,6 +63,7 @@ export default defineComponent({
     // 循环创建弹幕
     function loopCreate () {
       const renders = BarrageInstance.get()
+      console.log('renders' ,renders);
       for (let i = 0; i < renders.length; i++) {
         toScriptCreateBarrageItem({ content : '我是运营弹幕'})
       }
@@ -73,14 +74,12 @@ export default defineComponent({
     function lcMountedCallback (){
       setInitData()
       loopCreate()
-
     }
     watch(() => props.barrages , (newVal) => {
       // 如果 没有弹幕 则 不操作
       if(newVal?.length === 0) return
       BarrageInstance.set(newVal)
-
-    })
+    } , { deep: true , immediate: true })
     onMounted(lcMountedCallback)
     expose({})
     return {
@@ -120,7 +119,9 @@ export default defineComponent({
       box-sizing: border-box;
       // opacity: 0;
       background-color: #ccc;
-
+    }
+    :deep(.running){
+      animation: linear moveLeft 3s;
     }
   }
 }
