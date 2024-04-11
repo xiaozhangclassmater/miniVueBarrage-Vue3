@@ -8,7 +8,8 @@ interface miniVueBarrageProps {
 
 export interface BarrageItem {
   id: number,
-  speed: number,
+  delay: number,
+  icon: string,
   content: string,
-  top: number | string
+  top: number
 }
