@@ -20,7 +20,7 @@ export default defineComponent({
     // 是否需要全屏弹幕
     fullScreen: {
       type: Boolean,
-      default : true
+      default : false
     },
     // 弹幕运行一屏的秒数
     delay: {
@@ -30,7 +30,7 @@ export default defineComponent({
     // 创建频率的秒数
     createFrequencyTime: {
       type: Number,
-      default: 0.5
+      default: 0.2
     },
     createNum: {
       type: Number,
@@ -44,6 +44,7 @@ export default defineComponent({
     const bottomWapperRef = ref<HTMLDivElement | null>(null)
     const BarrageInstance = new BarrageManager()
     const timerId = ref<any>(null)
+    let lastIndex = -1 // 上一次生成的 index
     let clientWidthList: number[] = [] // 计算下一条弹幕应该在哪个弹道上生成
     const baseHeight = 40 // 弹幕默认的高度
     /**
@@ -51,27 +52,49 @@ export default defineComponent({
      * @param itemInstance
      */
     const maxLineCount = computed(() => {
+      console.log('barrageWapperRef.value?.clientHeight' ,barrageWapperRef.value?.clientHeight);
       const count = barrageWapperRef.value?.clientHeight && Math.floor(barrageWapperRef.value?.clientHeight / baseHeight) || 0
-      return props.fullScreen ? count : count / 2
+      return props.fullScreen ? count : Math.ceil(count / 2)
     })
     const appendElement = (instance:HTMLDivElement , currentRowIndex ) => {
+      console.log('currentRowIndex' , currentRowIndex);
+      if(!props.fullScreen){ // 如果非全屏 则 直接 添加到 上层容器
+        return topWapperRef.value?.appendChild(instance)
+      }
       currentRowIndex >= maxLineCount.value / 2 ? bottomWapperRef.value?.appendChild(instance) : topWapperRef.value?.appendChild(instance)
     }
     const setElementAttrs = (barrageElement:HTMLDivElement , instance:BarrageItem) => {
       barrageElement.classList.add('item-wapper')
       barrageElement.innerText = instance.content
     }
+
     function toScriptCreateBarrageItem (itemInstance : BarrageItem , currentRowIndex: number) {
-      const top = baseHeight * currentRowIndex
+      /**
+       * @description 计算添加 弹幕添加到哪个 弹道中
+       */
+      const calcAppendLineIndex = () => {
+        if(!clientWidthList.every(item => item)){
+          return currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
+        }
+        const minIndex = clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
+        console.log('minIndex' , minIndex);
+        // if() return 0
+        return minIndex
+      }
+      const top = currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
       const defaultItemInstance = {...itemInstance, top}
       const barrageElement = document.createElement('div')
-      setElementAttrs(barrageElement , defaultItemInstance)
-      appendElement(barrageElement , currentRowIndex )
-      setElementStyleAttrs(barrageElement , defaultItemInstance )
+
+      setElementAttrs(barrageElement , defaultItemInstance) // 设置元素的属性
+      appendElement(barrageElement , currentRowIndex) // 添加弹幕到容器中
+      setElementStyleAttrs(barrageElement , defaultItemInstance , currentRowIndex) // 设置弹幕的样式动画属性等
     }
-    function setElementStyleAttrs (barrageElement: HTMLDivElement ,instance:BarrageItem){
+    function setElementStyleAttrs (barrageElement: HTMLDivElement ,instance:BarrageItem , index: number){
       const elStyle = barrageElement.style
-      const offsetRightValue = randomNumber() + barrageElement.clientWidth
+      const instanceClientWidth = barrageElement.clientWidth || 0
+      const offsetRightValue = randomNumber() + instanceClientWidth
+      clientWidthList[index - 1] = clientWidthList[index - 1] + instanceClientWidth // 将弹道的长度添加数组中
+      console.log('clientWidthList' , clientWidthList);
       elStyle.right = `${-offsetRightValue}px`
       elStyle.top = `${instance.top}px`
         // 容器宽度 + 最初 right 偏移值的距离
@@ -97,10 +120,12 @@ export default defineComponent({
         if(curCreateIndex === renders.length){
           return clearInterval(timerId.value)
         }
+        // const createIndexId = () => {
+        //   return
+        // }
         currentRowIndex = Math.ceil(randomNumber(1 , maxLineCount.value)) // 随机一个弹道生成弹幕
-        console.log('randomNumber(1 , maxLineCount.value)' , currentRowIndex );
-        // if(currentRowIndex >= maxLineCount.value){ // 边界处理
-        //   currentRowIndex = 1
+        // if(currentRowIndex === lastIndex){
+        //   currentRowIndex = Math.ceil(randomNumber(1 , maxLineCount.value)) // 重新生成，
         // }
         for (let index = 0; index < props.createNum; index ++) {
           item = renders[curCreateIndex]
@@ -147,7 +172,7 @@ export default defineComponent({
 .barrage-wapper{
   position: relative;
   width: 100%;
-  height: 300px;
+  height: 600px;
   background-image: -webkit-linear-gradient(315deg, #42d392 25%, #647eff);
   padding: 20px 0px;
   overflow: hidden;
@@ -167,7 +192,8 @@ export default defineComponent({
       padding: 10px;
       box-sizing: border-box;
       // opacity: 0;
-      background-color: #ccc;
+      // background-color: #ccc;
+      background-image: linear-gradient(to right ,#647eff , #eeb518);
     }
   }
 }
