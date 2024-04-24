@@ -1,4 +1,4 @@
-interface miniVueBarrageProps {
+export interface miniVueBarrageProps {
   barrages: Array<BarrageItem>,
   barrageLineBlockHeight: number
   barrageLineBlockCount: number

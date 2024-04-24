@@ -7,17 +7,21 @@ export default defineConfig({
     // 生产配置
       base: './',
       build: {
-        outDir: './dist',
-        minify: 'terser',
+        outDir: './dist/miniVueBarrage',
+        // minify: 'terser',
         // assetsDir: 'assets', //静态资源输出目录
         // cssCodeSplit: true,
         lib: {
-          entry: path.resolve(__dirname, './packages/index.ts'), // 指定生产打包 入口
+          entry: path.resolve(__dirname, './packages/components/index.ts'), // 指定生产打包 入口
           name: 'miniVueBarrage', // 打包完成的名称
           formats: ['es'], // 打包的 输出的 模式
-          fileName: () => `miniVueBarrage.js`
+          fileName: () => `index.js`
         },
         rollupOptions: {
+          output:{
+            // 设置静态资源输出目录
+            assetFileNames: (assetInfo) => 'assets/minivueBarrage.css'
+          },
           external: ['vue'],
         }
       },
