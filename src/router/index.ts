@@ -5,11 +5,11 @@ const router = createRouter({
   routes:[
     {
       path: '/',
-      redirect: '/payGround'
+      redirect: '/miniVueVBarrage'
     },
     {
-      path: '/payGround',
-      component: () => import('../views/payGround/index.vue')
+      path: '/miniVueVBarrage',
+      component: () => import('@p/components/minivueBarrage/src/demo/index.vue')
     }
   ]
 })

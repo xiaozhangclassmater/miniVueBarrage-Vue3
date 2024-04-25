@@ -13,3 +13,8 @@ export interface BarrageItem {
   content: string,
   top: number
 }
+
+export interface elInstance {
+  barrageElement: HTMLDivElement
+  barrageIconElement: HTMLDivElement
+}

@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, render, useSlots, watch } from 'vue';
 import { BarrageManager } from './Factory';
 import { BarrageItem } from './types';
 import { randomNumber } from './util';
@@ -16,6 +16,11 @@ export default defineComponent({
     barrages: {
       type: Array<BarrageItem>,
       default: ()=>([])
+    },
+    // 图标是否从 开始位置显示 ，反之 末尾显示
+    startIcon: {
+      type: Boolean,
+      default: true
     },
     // 是否需要全屏弹幕
     fullScreen: {
@@ -30,7 +35,7 @@ export default defineComponent({
     // 创建频率的秒数
     createFrequencyTime: {
       type: Number,
-      default: 0.2
+      default: 2
     },
     createNum: {
       type: Number,
@@ -39,9 +44,12 @@ export default defineComponent({
   } ,
   emits: ["update:barrages"],
   setup(props ,{ expose  }){
+    const slots = useSlots()
     const barrageWapperRef = ref<HTMLDivElement | null>(null)
     const topWapperRef = ref<HTMLDivElement | null>(null)
     const bottomWapperRef = ref<HTMLDivElement | null>(null)
+    let barrageElement: HTMLDivElement = document.createElement('div')
+    let barrageIconElement: HTMLDivElement = document.createElement('div')
     const BarrageInstance = new BarrageManager()
     const timerId = ref<any>(null)
     let lastIndex = -1 // 上一次生成的 index
@@ -52,23 +60,26 @@ export default defineComponent({
      * @param itemInstance
      */
     const maxLineCount = computed(() => {
-      console.log('barrageWapperRef.value?.clientHeight' ,barrageWapperRef.value?.clientHeight);
       const count = barrageWapperRef.value?.clientHeight && Math.floor(barrageWapperRef.value?.clientHeight / baseHeight) || 0
       return props.fullScreen ? count : Math.ceil(count / 2)
     })
-    const appendElement = (instance:HTMLDivElement , currentRowIndex ) => {
-      console.log('currentRowIndex' , currentRowIndex);
+    const appendElement = (currentRowIndex :number) => {
+
       if(!props.fullScreen){ // 如果非全屏 则 直接 添加到 上层容器
-        return topWapperRef.value?.appendChild(instance)
+        return topWapperRef.value?.appendChild(barrageElement)
       }
-      currentRowIndex >= maxLineCount.value / 2 ? bottomWapperRef.value?.appendChild(instance) : topWapperRef.value?.appendChild(instance)
+      currentRowIndex >= maxLineCount.value / 2 ? bottomWapperRef.value?.appendChild(barrageElement) : topWapperRef.value?.appendChild(barrageElement)
+      barrageElement.appendChild(barrageIconElement)
     }
-    const setElementAttrs = (barrageElement:HTMLDivElement , instance:BarrageItem) => {
+    const setElementAttrs = (instance:BarrageItem) => {
       barrageElement.classList.add('item-wapper')
+      props.startIcon && barrageElement.classList.add('reverse-icon')
       barrageElement.innerText = instance.content
     }
 
     function toScriptCreateBarrageItem (itemInstance : BarrageItem , currentRowIndex: number) {
+      const createIconInstance = slots?.icon as Function
+      const iconVnode = createIconInstance()?.[0] || undefined
       /**
        * @description 计算添加 弹幕添加到哪个 弹道中
        */
@@ -77,24 +88,26 @@ export default defineComponent({
           return currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
         }
         const minIndex = clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
-        console.log('minIndex' , minIndex);
-        // if() return 0
         return minIndex
       }
+
       const top = currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
       const defaultItemInstance = {...itemInstance, top}
-      const barrageElement = document.createElement('div')
-
-      setElementAttrs(barrageElement , defaultItemInstance) // 设置元素的属性
-      appendElement(barrageElement , currentRowIndex) // 添加弹幕到容器中
-      setElementStyleAttrs(barrageElement , defaultItemInstance , currentRowIndex) // 设置弹幕的样式动画属性等
+      barrageElement = document.createElement('div')
+      barrageIconElement = document.createElement('div')
+      // 如果 vnode元素存在的话 则 渲染成真实dom 挂载到 元素身上
+      if(iconVnode){
+        render(iconVnode , barrageIconElement)
+      }
+      setElementAttrs(defaultItemInstance) // 设置元素的属性
+      appendElement(currentRowIndex) // 添加弹幕到容器中
+      setElementStyleAttrs(defaultItemInstance , currentRowIndex) // 设置弹幕的样式动画属性等
     }
-    function setElementStyleAttrs (barrageElement: HTMLDivElement ,instance:BarrageItem , index: number){
+    function setElementStyleAttrs (instance:BarrageItem , index: number) {
       const elStyle = barrageElement.style
-      const instanceClientWidth = barrageElement.clientWidth || 0
+      const instanceClientWidth = barrageElement?.clientWidth || 0
       const offsetRightValue = randomNumber() + instanceClientWidth
       clientWidthList[index - 1] = clientWidthList[index - 1] + instanceClientWidth // 将弹道的长度添加数组中
-      console.log('clientWidthList' , clientWidthList);
       elStyle.right = `${-offsetRightValue}px`
       elStyle.top = `${instance.top}px`
         // 容器宽度 + 最初 right 偏移值的距离
@@ -180,20 +193,23 @@ export default defineComponent({
   .top-barrage-wapper,.bottom-barrage-wapper{
     width: 100%;
     height: 50%;
-
+    .reverse-icon{
+      flex-direction: row-reverse;
+    }
     .item-wapper{
       position: absolute;
       right: -100px;
       display: inline-flex;
       align-items: center;
-      height: 30px;
+      // height: 30px;
       font-size: 14px;
       border-radius: 20px;
       padding: 10px;
       box-sizing: border-box;
-      // opacity: 0;
-      // background-color: #ccc;
       background-image: linear-gradient(to right ,#647eff , #eeb518);
+      .icon{
+        margin-right: 5px;
+      }
     }
   }
 }
