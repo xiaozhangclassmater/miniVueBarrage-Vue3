@@ -7,6 +7,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, render, useSlots, watch } from 'vue';
+import { PLAYSTATERROUP } from './constant';
 import { BarrageManager } from './Factory';
 import { BarrageItem } from './types';
 import { randomNumber } from './util';
@@ -30,12 +31,12 @@ export default defineComponent({
     // 弹幕运行一屏的秒数
     delay: {
       type: Number,
-      default: 8
+      default: 12
     },
     // 创建频率的秒数
     createFrequencyTime: {
       type: Number,
-      default: 2
+      default: 0.8
     },
     createNum: {
       type: Number,
@@ -64,33 +65,49 @@ export default defineComponent({
       return props.fullScreen ? count : Math.ceil(count / 2)
     })
     const appendElement = (currentRowIndex :number) => {
-
       if(!props.fullScreen){ // 如果非全屏 则 直接 添加到 上层容器
         return topWapperRef.value?.appendChild(barrageElement)
       }
       currentRowIndex >= maxLineCount.value / 2 ? bottomWapperRef.value?.appendChild(barrageElement) : topWapperRef.value?.appendChild(barrageElement)
       barrageElement.appendChild(barrageIconElement)
     }
+    /**
+     * 添加每个 dom的 监听事件
+     */
+    const elAddEventListener = () => {
+      /**
+       *鼠标移入弹幕时 进行弹幕暂停
+       */
+      const barrageMouseenterCallback = (e : MouseEvent) => {
+        const currentClickDom = e.target as HTMLDivElement
+        currentClickDom.style.animationPlayState = PLAYSTATERROUP.PAUSED
+      }
+      const barrageMouseLeaveCallback = (e : MouseEvent) => {
+        const currentClickDom = e.target as HTMLDivElement
+        currentClickDom.style.animationPlayState = PLAYSTATERROUP.RUNNING
+      }
+      barrageElement.addEventListener('mouseenter' , barrageMouseenterCallback)
+      barrageElement.addEventListener('mouseleave' , barrageMouseLeaveCallback)
+    }
+
     const setElementAttrs = (instance:BarrageItem) => {
       barrageElement.classList.add('item-wapper')
       props.startIcon && barrageElement.classList.add('reverse-icon')
       barrageElement.innerText = instance.content
     }
-
+    //  /**
+    //  * @description 计算添加 弹幕添加到哪个 弹道中
+    //  */
+    // const calcAppendLineIndex = () => {
+    //   if(!clientWidthList.every(item => item)){
+    //     return currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
+    //   }
+    //   const minIndex = clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
+    //   return minIndex
+    // }
     function toScriptCreateBarrageItem (itemInstance : BarrageItem , currentRowIndex: number) {
       const createIconInstance = slots?.icon as Function
       const iconVnode = createIconInstance()?.[0] || undefined
-      /**
-       * @description 计算添加 弹幕添加到哪个 弹道中
-       */
-      const calcAppendLineIndex = () => {
-        if(!clientWidthList.every(item => item)){
-          return currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
-        }
-        const minIndex = clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
-        return minIndex
-      }
-
       const top = currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
       const defaultItemInstance = {...itemInstance, top}
       barrageElement = document.createElement('div')
@@ -102,6 +119,7 @@ export default defineComponent({
       setElementAttrs(defaultItemInstance) // 设置元素的属性
       appendElement(currentRowIndex) // 添加弹幕到容器中
       setElementStyleAttrs(defaultItemInstance , currentRowIndex) // 设置弹幕的样式动画属性等
+      elAddEventListener()
     }
     function setElementStyleAttrs (instance:BarrageItem , index: number) {
       const elStyle = barrageElement.style
@@ -202,6 +220,7 @@ export default defineComponent({
       display: inline-flex;
       align-items: center;
       // height: 30px;
+      cursor: pointer;
       font-size: 14px;
       border-radius: 20px;
       padding: 10px;

@@ -14,7 +14,4 @@ export interface BarrageItem {
   top: number
 }
 
-export interface elInstance {
-  barrageElement: HTMLDivElement
-  barrageIconElement: HTMLDivElement
-}
+export type playState = 'running' | 'paused'
