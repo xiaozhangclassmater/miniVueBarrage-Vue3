@@ -1,17 +1,22 @@
 export interface miniVueBarrageProps {
   barrages: Array<BarrageItem>,
-  barrageLineBlockHeight: number
-  barrageLineBlockCount: number
+  startIcon: boolean,
+  iconUrlInShow: boolean
   fullScreen: boolean
+  createFrequencyTime: number,
+  createNum: number
   delay: number
-}
+  opacity: number
 
+}
+export type baseType = undefined | string | number | null | object | []
 export interface BarrageItem {
-  id: number,
-  delay: number,
-  icon: string,
+  id?: number,
+  delay?: number,
+  iconUrl?: string,
   content: string,
-  top: number
+  top?: number
+  color?: string
 }
 
 export type playState = 'running' | 'paused'

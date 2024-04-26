@@ -1,4 +1,13 @@
-export const PLAYSTATERROUP = {
+export const PLAYSTATEGROUP = {
   RUNNING: 'running',
-  PAUSED: 'paused'
+  PAUSED: 'paused',
+  END: 'end'
+}
+
+export const KEYGROUP = {
+  RUNNINGSTATE: 'runningState'
+}
+
+export const CSSKEY = {
+  OPACITY: 'opacity'
 }

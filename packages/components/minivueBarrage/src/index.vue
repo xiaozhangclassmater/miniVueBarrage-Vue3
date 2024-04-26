@@ -7,42 +7,13 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, render, useSlots, watch } from 'vue';
-import { PLAYSTATERROUP } from './constant';
-import { BarrageManager } from './Factory';
+import { CSSKEY, KEYGROUP, PLAYSTATEGROUP } from './constant';
+import { BarrageManager, buildProps } from './Factory';
 import { BarrageItem } from './types';
-import { randomNumber } from './util';
+import { denounce, isEmpty, randomNumber } from './util';
 export default defineComponent({
   name: 'miniVueBarrage',
-  props: {
-    barrages: {
-      type: Array<BarrageItem>,
-      default: ()=>([])
-    },
-    // 图标是否从 开始位置显示 ，反之 末尾显示
-    startIcon: {
-      type: Boolean,
-      default: true
-    },
-    // 是否需要全屏弹幕
-    fullScreen: {
-      type: Boolean,
-      default : false
-    },
-    // 弹幕运行一屏的秒数
-    delay: {
-      type: Number,
-      default: 12
-    },
-    // 创建频率的秒数
-    createFrequencyTime: {
-      type: Number,
-      default: 0.8
-    },
-    createNum: {
-      type: Number,
-      default: 1
-    }
-  } ,
+  props: buildProps() ,
   emits: ["update:barrages"],
   setup(props ,{ expose  }){
     const slots = useSlots()
@@ -56,12 +27,71 @@ export default defineComponent({
     let lastIndex = -1 // 上一次生成的 index
     let clientWidthList: number[] = [] // 计算下一条弹幕应该在哪个弹道上生成
     const baseHeight = 40 // 弹幕默认的高度
+    const calcOpacity = computed(() => `${(Number(props.opacity) / 100) || 1}`)
+
+    /**
+     * 弹幕创建
+     */
+    const create = (instance: BarrageItem) => {
+      console.log('instance111' , isEmpty(instance));
+      // if(isEmpty(instance)){ // 传入的实例数据不存在 则 无法添加
+      //   return
+      // }
+      console.log('clientWidth' , clientWidthList);
+      console.log('instance' , instance);
+      const minIndex = clientWidthList.findLastIndex(item => item === Math.min(...clientWidthList))
+      console.log(minIndex);
+
+      // const
+      // toScriptCreateBarrageItem()
+    }
+    /**
+     * 暂停所有弹幕
+     */
+    const pausedAllBarrage = () => {
+
+    }
+    // 改变弹幕颜色
+    const changeColor = (colorStr: string , id: number) => {
+
+    }
+    /**
+     * @description 关闭弹幕
+     * */
+    const close = () => {
+      timerId.value && clearInterval(timerId.value)
+      BarrageInstance._close()
+    }
+    /**
+     *
+     * @param id 设置透明度 弹幕的id
+     * @param opacity 设置的透明度的值 max 1 ,  min 0
+     * @description
+     * setBarrageOpacity 函数 提供设置所有节点透明度 和单一节点透明度作用
+     */
+    const setBarrageOpacity = (id?: number , opacity?: number | string  ) => {
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      if(!allBarrages.length) return // 如果没有 子节点 则 不要设置 透明属性
+      if(id){ // 设置单个节点 透明度
+        const renderDatas = BarrageInstance.get() // 获取所有弹幕数据
+        const elementIndex = renderDatas.findIndex(item => item.id === id)
+        const elementNode = allBarrages[elementIndex]  || null
+        if(!elementNode) return
+        elementNode.style.setProperty(CSSKEY.OPACITY , `${opacity || props.opacity}`)
+      }else{
+        for (const el of allBarrages) {
+          // 循环设置 每个节点的 透明度
+          el.style.setProperty(CSSKEY.OPACITY , calcOpacity.value)
+        }
+      }
+    }
     /**
      * @description 通过 js 创建弹幕实例
      * @param itemInstance
      */
     const maxLineCount = computed(() => {
-      const count = barrageWapperRef.value?.clientHeight && Math.floor(barrageWapperRef.value?.clientHeight / baseHeight) || 0
+      // const paddigHeight = barrageWapperRef.value && (window.getComputedStyle(barrageWapperRef.value).paddingTop + window.getComputedStyle(barrageWapperRef.value).paddingBottom)
+      const count = barrageWapperRef.value?.clientHeight && Math.floor((barrageWapperRef.value?.clientHeight) / baseHeight) || 0
       return props.fullScreen ? count : Math.ceil(count / 2)
     })
     const appendElement = (currentRowIndex :number) => {
@@ -78,24 +108,36 @@ export default defineComponent({
       /**
        *鼠标移入弹幕时 进行弹幕暂停
        */
-      const barrageMouseenterCallback = (e : MouseEvent) => {
+      const mouseenterCallback = (e : MouseEvent) => {
         const currentClickDom = e.target as HTMLDivElement
-        currentClickDom.style.animationPlayState = PLAYSTATERROUP.PAUSED
+        currentClickDom.style.animationPlayState = PLAYSTATEGROUP.PAUSED
       }
-      const barrageMouseLeaveCallback = (e : MouseEvent) => {
+      const mouseLeaveCallback = (e : MouseEvent) => {
         const currentClickDom = e.target as HTMLDivElement
-        currentClickDom.style.animationPlayState = PLAYSTATERROUP.RUNNING
+        currentClickDom.style.animationPlayState = PLAYSTATEGROUP.RUNNING
       }
-      barrageElement.addEventListener('mouseenter' , barrageMouseenterCallback)
-      barrageElement.addEventListener('mouseleave' , barrageMouseLeaveCallback)
+      const animationendCallback = () => {
+        barrageElement.setAttribute(KEYGROUP.RUNNINGSTATE ,PLAYSTATEGROUP.END)
+      }
+
+      barrageElement.addEventListener('mouseenter' , mouseenterCallback)
+      barrageElement.addEventListener('mouseleave' , mouseLeaveCallback)
+      barrageElement.addEventListener('animationend' , animationendCallback)
     }
 
-    const setElementAttrs = (instance:BarrageItem) => {
+    const setElementAttrs = (instance :BarrageItem) => {
+      // 如果每个icon链接存在证明需要显示icon
+      if(instance.iconUrl && props.iconUrlInShow) {
+        barrageIconElement.classList.add('iconLink-style') // 添加链接形式Icon的类名样式
+        barrageIconElement.style.background = `url(${instance.iconUrl}) no-repeat center center / cover`
+      }
+      barrageElement.innerText = instance.content
+      barrageElement.setAttribute(KEYGROUP.RUNNINGSTATE , PLAYSTATEGROUP.RUNNING) // 设置 初始化运行状态
       barrageElement.classList.add('item-wapper')
       props.startIcon && barrageElement.classList.add('reverse-icon')
-      barrageElement.innerText = instance.content
+
     }
-    //  /**
+    // /**
     //  * @description 计算添加 弹幕添加到哪个 弹道中
     //  */
     // const calcAppendLineIndex = () => {
@@ -105,9 +147,10 @@ export default defineComponent({
     //   const minIndex = clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
     //   return minIndex
     // }
+
     function toScriptCreateBarrageItem (itemInstance : BarrageItem , currentRowIndex: number) {
       const createIconInstance = slots?.icon as Function
-      const iconVnode = createIconInstance()?.[0] || undefined
+      const iconVnode = createIconInstance()?.[0] || false
       const top = currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
       const defaultItemInstance = {...itemInstance, top}
       barrageElement = document.createElement('div')
@@ -121,13 +164,14 @@ export default defineComponent({
       setElementStyleAttrs(defaultItemInstance , currentRowIndex) // 设置弹幕的样式动画属性等
       elAddEventListener()
     }
-    function setElementStyleAttrs (instance:BarrageItem , index: number) {
+    function setElementStyleAttrs (instance: BarrageItem , index: number) {
       const elStyle = barrageElement.style
       const instanceClientWidth = barrageElement?.clientWidth || 0
       const offsetRightValue = randomNumber() + instanceClientWidth
       clientWidthList[index - 1] = clientWidthList[index - 1] + instanceClientWidth // 将弹道的长度添加数组中
       elStyle.right = `${-offsetRightValue}px`
       elStyle.top = `${instance.top}px`
+      elStyle.opacity = `${calcOpacity.value}`
         // 容器宽度 + 最初 right 偏移值的距离
       elStyle.setProperty('--wapperClientWidth' ,`-${(barrageWapperRef.value?.clientWidth || 0)  + offsetRightValue}px`)
       elStyle.animationName = 'moveLeft'
@@ -143,6 +187,7 @@ export default defineComponent({
     }
     // 循环创建弹幕
     function loopCreate () {
+      console.log('maxCount' , maxLineCount.value);
       const renders = BarrageInstance.get()
       let curCreateIndex = 0 // 当前创建的索引总数 到第几条了
       let currentRowIndex = 1
@@ -151,13 +196,7 @@ export default defineComponent({
         if(curCreateIndex === renders.length){
           return clearInterval(timerId.value)
         }
-        // const createIndexId = () => {
-        //   return
-        // }
         currentRowIndex = Math.ceil(randomNumber(1 , maxLineCount.value)) // 随机一个弹道生成弹幕
-        // if(currentRowIndex === lastIndex){
-        //   currentRowIndex = Math.ceil(randomNumber(1 , maxLineCount.value)) // 重新生成，
-        // }
         for (let index = 0; index < props.createNum; index ++) {
           item = renders[curCreateIndex]
           toScriptCreateBarrageItem(item , currentRowIndex)
@@ -174,14 +213,23 @@ export default defineComponent({
       setInitData()
       loopCreate()
     }
-    watch(() => props.barrages , (newVal) => {
-      // 如果 没有弹幕 则 不操作
-      if(newVal?.length === 0) return
-      BarrageInstance.set(newVal) // 设置数据到 管理类中统一管理
-    } , { deep: true , immediate: true })
-
+    const barragesWatchCallback = (newVal:BarrageItem[]) => {
+       // 如果 没有弹幕 则 不操作
+       if(!newVal?.length){
+        // 如果没数据 则判断定时器是否存在 ， 存在则 清除(实现无数据时 清空弹幕功能) 定时去 反之 不处理
+        timerId.value && clearInterval(timerId.value)
+      }else{
+        BarrageInstance.set(newVal) // 设置数据到 管理类中统一管理
+      }
+    }
+    const opacityWatchCallback = denounce(() => setBarrageOpacity() , 200)
+    watch(() => props.barrages , barragesWatchCallback , { deep: true , immediate: true })
+    watch(() => props.opacity , opacityWatchCallback)
     onMounted(lcMountedCallback)
-    expose({})
+    expose({
+      create,
+      setBarrageOpacity
+    })
     return {
       barrageWapperRef,
       topWapperRef,
@@ -219,16 +267,26 @@ export default defineComponent({
       right: -100px;
       display: inline-flex;
       align-items: center;
-      // height: 30px;
+      height: 35px;
       cursor: pointer;
       font-size: 14px;
       border-radius: 20px;
       padding: 10px;
       box-sizing: border-box;
-      background-image: linear-gradient(to right ,#647eff , #eeb518);
+      background-color: #fec821;
+      // background-image: linear-gradient(to right ,#647eff , #eeb518);
       .icon{
         margin-right: 5px;
       }
+    }
+    .iconLink-style{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 5px;
+      background-size: 100% 100%;
     }
   }
 }

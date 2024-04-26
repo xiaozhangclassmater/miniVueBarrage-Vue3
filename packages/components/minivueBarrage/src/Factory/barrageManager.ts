@@ -12,21 +12,21 @@ class BarrageManager {
   constructor(barrages?: BarrageItem[]){
     this.barrages = barrages || []
   }
-  play() {
+  _play() {
 
   }
 
-  createBarrage() {
+  _createBarrage() {
 
   }
 
-  close() {
+  _close() {
 
   }
   /**
    * @description 刷新弹幕
    */
-  refresh() {
+  _refresh() {
 
   }
   // 初始化弹幕
@@ -42,7 +42,7 @@ class BarrageManager {
   size () {
     return this.barrages.length || 0
   }
-  
+
 }
 
 export default BarrageManager

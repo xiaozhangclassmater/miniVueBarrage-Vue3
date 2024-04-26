@@ -1,6 +1,7 @@
 export const  barrageDatas = [
   {
-    content: '的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的'
+    content: '的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的的撒好看的',
+    iconUrl: 'https://storage.googleapis.com/vue-mastery.appspot.com/flamelink/media/vue-mastery-logo.png'
   },{
     content: '吕德华是真的红1'
   },{
