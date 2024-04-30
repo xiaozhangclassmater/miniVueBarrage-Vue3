@@ -6,17 +6,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, render, useSlots, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, render, watch } from 'vue';
+import { denounce, getStyleValue, isEmpty, unitToValue, useExpose } from '../../../utils';
 import { CSSKEY, KEYGROUP, PLAYSTATEGROUP } from './constant';
 import { BarrageManager, buildProps } from './Factory';
 import { BarrageItem } from './types';
-import { denounce, isEmpty, randomNumber } from './util';
+import { randomNumber } from './util';
 export default defineComponent({
   name: 'miniVueBarrage',
   props: buildProps() ,
   emits: ["update:barrages"],
-  setup(props ,{ expose  }){
-    const slots = useSlots()
+  setup(props ,{ slots , expose }){
     const barrageWapperRef = ref<HTMLDivElement | null>(null)
     const topWapperRef = ref<HTMLDivElement | null>(null)
     const bottomWapperRef = ref<HTMLDivElement | null>(null)
@@ -28,22 +28,21 @@ export default defineComponent({
     let clientWidthList: number[] = [] // 计算下一条弹幕应该在哪个弹道上生成
     const baseHeight = 40 // 弹幕默认的高度
     const calcOpacity = computed(() => `${(Number(props.opacity) / 100) || 1}`)
-
     /**
      * 弹幕创建
      */
     const create = (instance: BarrageItem) => {
-      console.log('instance111' , isEmpty(instance));
-      // if(isEmpty(instance)){ // 传入的实例数据不存在 则 无法添加
-      //   return
-      // }
-      console.log('clientWidth' , clientWidthList);
-      console.log('instance' , instance);
-      const minIndex = clientWidthList.findLastIndex(item => item === Math.min(...clientWidthList))
-      console.log(minIndex);
-
-      // const
-      // toScriptCreateBarrageItem()
+      if(isEmpty(instance)){ // 传入的实例数据不存在 则 无法添加
+        return
+      }
+      let minIndex = clientWidthList.findIndex(((item , index) => (item === Math.min(...clientWidthList)))) || 1
+      if(minIndex === lastIndex){  //如果我 刚刚添加的位置 跟此次查找的最小距离位置 相等 ，则 再找一个更合适的
+        minIndex = clientWidthList.findIndex(((item , index) => (item === Math.min(...clientWidthList) && index !== lastIndex)))
+      }
+      lastIndex = minIndex
+      console.log('minIndex' , minIndex);
+      // lastIndex = minIndex
+      toScriptCreateBarrageItem(instance , minIndex)
     }
     /**
      * 暂停所有弹幕
@@ -90,8 +89,10 @@ export default defineComponent({
      * @param itemInstance
      */
     const maxLineCount = computed(() => {
-      // const paddigHeight = barrageWapperRef.value && (window.getComputedStyle(barrageWapperRef.value).paddingTop + window.getComputedStyle(barrageWapperRef.value).paddingBottom)
-      const count = barrageWapperRef.value?.clientHeight && Math.floor((barrageWapperRef.value?.clientHeight) / baseHeight) || 0
+      const paddingTopValue = Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingTop')))
+      const paddingBottomValue = Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingBottom')))
+      const paddigHeight = paddingTopValue + paddingBottomValue
+      const count = barrageWapperRef.value?.clientHeight && Math.floor((barrageWapperRef.value?.clientHeight - paddigHeight) / baseHeight) || 0
       return props.fullScreen ? count : Math.ceil(count / 2)
     })
     const appendElement = (currentRowIndex :number) => {
@@ -135,6 +136,7 @@ export default defineComponent({
       barrageElement.setAttribute(KEYGROUP.RUNNINGSTATE , PLAYSTATEGROUP.RUNNING) // 设置 初始化运行状态
       barrageElement.classList.add('item-wapper')
       props.startIcon && barrageElement.classList.add('reverse-icon')
+      instance.type === 'myuser' && barrageElement.classList.add('my-user-item-wapper-style')
 
     }
     // /**
@@ -224,21 +226,19 @@ export default defineComponent({
     }
     const opacityWatchCallback = denounce(() => setBarrageOpacity() , 200)
     watch(() => props.barrages , barragesWatchCallback , { deep: true , immediate: true })
-    watch(() => props.opacity , opacityWatchCallback)
+    watch(() => props.opacity , opacityWatchCallback , { immediate: true })
     onMounted(lcMountedCallback)
-    expose({
-      create,
-      setBarrageOpacity
-    })
+    expose(useExpose())
     return {
       barrageWapperRef,
       topWapperRef,
-      bottomWapperRef
+      bottomWapperRef,
+      create
     }
   }
 })
 </script>
-<style  lang="less" >
+<style  lang="less">
 @keyframes moveLeft {
   from{
     transform: translateX(0px);
@@ -278,6 +278,9 @@ export default defineComponent({
       .icon{
         margin-right: 5px;
       }
+    }
+    .my-user-item-wapper-style{
+      border: 2px solid #ff0000 !important;
     }
     .iconLink-style{
       display: flex;

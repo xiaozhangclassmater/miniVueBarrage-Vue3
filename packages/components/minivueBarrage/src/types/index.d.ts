@@ -10,13 +10,20 @@ export interface miniVueBarrageProps {
 
 }
 export type baseType = undefined | string | number | null | object | []
+export type barrrageTypeGroup = 'user' | 'myuser' | 'testUser'
 export interface BarrageItem {
   id?: number,
   delay?: number,
   iconUrl?: string,
   content: string,
   top?: number
-  color?: string
+  color?: string,
+  type?: barrrageTypeGroup
 }
 
 export type playState = 'running' | 'paused'
+
+export interface barrageExpose extends miniVueBarrageProps {
+  create: (instance: BarrageItem) => void;
+  setBarrageOpacity: () => void
+}

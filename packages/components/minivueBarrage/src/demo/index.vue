@@ -10,7 +10,7 @@
         <div>操作面板</div>
         <div class="left-operation-panel">
           <div class="slider-demo-block">
-            <div class="demonstration">透明度：</div>
+            <div class="demonstration flex-wapper">透明度：</div>
             <el-slider v-model="opacityValue" />
           </div>
           <div class="flex-wapper margin-t-8">
@@ -60,8 +60,8 @@ import { ref } from 'vue';
 import { barrageDatas } from '../../../../mock';
 import miniVueBarrage from '../index.vue';
 const barrages = [...barrageDatas]
-const opacityValue = ref(0)
-const barrageRef= ref<InstanceType<typeof miniVueBarrage>>()
+const opacityValue = ref(100)
+const barrageRef= ref<InstanceType<typeof miniVueBarrage> >()
 const barrageHeightValue = ref(35)
 const fullScreenSwitch = ref(false)
 const showBarrage = ref(true)
@@ -69,14 +69,13 @@ const barragePaused = ref(false)
 const barrageContent = ref('')
 const times = ref(1)
 const addHandle = () => {
-  // barrageRef.value?
-  // console.log('barrageRef' , barrageRef.value());
   if(!barrageContent.value){
     return Message.warning("内容不能为空")
   }
   barrageRef.value?.create({
     content: barrageContent.value,
-    id: 100
+    id: 1,
+    type: 'myuser'
   })
 }
 </script>
