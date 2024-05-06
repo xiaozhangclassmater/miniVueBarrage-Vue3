@@ -25,12 +25,29 @@ export default defineComponent({
     const BarrageInstance = new BarrageManager()
     const timerId = ref<any>(null)
     let lastIndex = -1 // 上一次生成的 index
+    let lastRecordIndex = -1
     let clientWidthList: number[] = [] // 计算下一条弹幕应该在哪个弹道上生成
     const baseHeight = 40 // 弹幕默认的高度
-    const calcOpacity = computed(() => `${(Number(props.opacity) / 100) || 1}`)
+    const calcOpacity = computed(() => `${(Number(props.opacity) / 100) || 0}`)
     /**
-     * 弹幕创建
-     */
+     * @description 通过 js 创建弹幕实例
+     * @param itemInstance
+    */
+    const maxLineCount = computed(() => {
+      const paddingTopValue = Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingTop')))
+      const paddingBottomValue = Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingBottom')))
+      const paddigHeight = paddingTopValue + paddingBottomValue
+      const count = barrageWapperRef.value?.clientHeight && Math.floor((barrageWapperRef.value?.clientHeight - paddigHeight) / baseHeight) || 0
+      return props.fullScreen ? count : Math.ceil(count / 2)
+    })
+    const clearData = () => {
+      lastIndex = -1
+      lastRecordIndex = -1,
+      clientWidthList = []
+      timerId.value = null
+
+    }
+    // 弹幕创建
     const create = (instance: BarrageItem) => {
       if(isEmpty(instance)){ // 传入的实例数据不存在 则 无法添加
         return
@@ -40,26 +57,45 @@ export default defineComponent({
         minIndex = clientWidthList.findIndex(((item , index) => (item === Math.min(...clientWidthList) && index !== lastIndex)))
       }
       lastIndex = minIndex
-      console.log('minIndex' , minIndex);
-      // lastIndex = minIndex
       toScriptCreateBarrageItem(instance , minIndex)
     }
-    /**
-     * 暂停所有弹幕
-     */
+    // 暂停所有弹幕
     const pausedAllBarrage = () => {
-
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      if(!allBarrages.length) return // 如果没有 子节点 则不操作
+      for (const el of allBarrages) {
+        el.style.animationPlayState = props.pausedFlag ? PLAYSTATEGROUP.PAUSED : PLAYSTATEGROUP.RUNNING
+      }
+      if(props.pausedFlag){
+        clearInterval(timerId.value)
+      }else{
+        loopCreate(lastRecordIndex)
+      }
     }
     // 改变弹幕颜色
     const changeColor = (colorStr: string , id: number) => {
 
     }
-    /**
-     * @description 关闭弹幕
-     * */
+    // 关闭弹幕
     const close = () => {
       timerId.value && clearInterval(timerId.value)
       BarrageInstance._close()
+    }
+    // 重置弹幕
+    const reset = () => {
+      removeAllChildrenEl()
+      clearInterval(timerId.value)
+      clearData()
+      _init()
+    }
+    // 移除所有 弹幕 children 元素
+    function removeAllChildrenEl () {
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      console.log('allBarrages' ,allBarrages);
+      if(!allBarrages.length) return // 如果没有 子节点 则不操作
+      for (const item of allBarrages) {
+        item.remove()
+      }
     }
     /**
      *
@@ -84,17 +120,6 @@ export default defineComponent({
         }
       }
     }
-    /**
-     * @description 通过 js 创建弹幕实例
-     * @param itemInstance
-     */
-    const maxLineCount = computed(() => {
-      const paddingTopValue = Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingTop')))
-      const paddingBottomValue = Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingBottom')))
-      const paddigHeight = paddingTopValue + paddingBottomValue
-      const count = barrageWapperRef.value?.clientHeight && Math.floor((barrageWapperRef.value?.clientHeight - paddigHeight) / baseHeight) || 0
-      return props.fullScreen ? count : Math.ceil(count / 2)
-    })
     const appendElement = (currentRowIndex :number) => {
       if(!props.fullScreen){ // 如果非全屏 则 直接 添加到 上层容器
         return topWapperRef.value?.appendChild(barrageElement)
@@ -139,21 +164,20 @@ export default defineComponent({
       instance.type === 'myuser' && barrageElement.classList.add('my-user-item-wapper-style')
 
     }
-    // /**
-    //  * @description 计算添加 弹幕添加到哪个 弹道中
-    //  */
-    // const calcAppendLineIndex = () => {
-    //   if(!clientWidthList.every(item => item)){
-    //     return currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
-    //   }
-    //   const minIndex = clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
-    //   return minIndex
-    // }
+    /**
+     * @description 计算添加 弹幕添加到哪个 弹道中
+     */
+    const calcAppendLineIndex = (): number => {
+      const minIndex = clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
+      return minIndex
+    }
 
     function toScriptCreateBarrageItem (itemInstance : BarrageItem , currentRowIndex: number) {
       const createIconInstance = slots?.icon as Function
       const iconVnode = createIconInstance()?.[0] || false
-      const top = currentRowIndex === 1 ? 10 : (baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))
+
+      const top = (currentRowIndex === 0) ? props.baseLineHeight : (baseHeight * currentRowIndex + props.baseLineHeight)
+      // console.log('(baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))' ,top);
       const defaultItemInstance = {...itemInstance, top}
       barrageElement = document.createElement('div')
       barrageIconElement = document.createElement('div')
@@ -161,16 +185,19 @@ export default defineComponent({
       if(iconVnode){
         render(iconVnode , barrageIconElement)
       }
+      console.log('clientWidthList------------1' , clientWidthList);
       setElementAttrs(defaultItemInstance) // 设置元素的属性
       appendElement(currentRowIndex) // 添加弹幕到容器中
       setElementStyleAttrs(defaultItemInstance , currentRowIndex) // 设置弹幕的样式动画属性等
       elAddEventListener()
     }
     function setElementStyleAttrs (instance: BarrageItem , index: number) {
+      const curIndex = index
+      console.log('index---------index' , index);
       const elStyle = barrageElement.style
       const instanceClientWidth = barrageElement?.clientWidth || 0
       const offsetRightValue = randomNumber() + instanceClientWidth
-      clientWidthList[index - 1] = clientWidthList[index - 1] + instanceClientWidth // 将弹道的长度添加数组中
+      clientWidthList[curIndex] = clientWidthList[curIndex] + instanceClientWidth // 将弹道的长度添加数组中
       elStyle.right = `${-offsetRightValue}px`
       elStyle.top = `${instance.top}px`
       elStyle.opacity = `${calcOpacity.value}`
@@ -185,36 +212,37 @@ export default defineComponent({
      * 设置初始化数据
      */
     function setInitData() {
-      clientWidthList = new Array(maxLineCount.value).fill(0) // 初始化弹道宽度，下一次应该在何处插入
+      clientWidthList = new Array(maxLineCount.value) // 初始化弹道宽度，下一次应该在何处插入
+      for( let i = 0; i < clientWidthList.length; i++ ){
+        clientWidthList[i] = randomNumber(1 , 100) // 初始化的时候 来随机 弹道的长度 方便 找到最小插入的地方
+      };
     }
     // 循环创建弹幕
-    function loopCreate () {
-      console.log('maxCount' , maxLineCount.value);
+    function loopCreate (recordIndex?: number) {
       const renders = BarrageInstance.get()
-      let curCreateIndex = 0 // 当前创建的索引总数 到第几条了
+      let curCreateIndex = recordIndex || 0 // 当前创建的索引总数 到第几条了
       let currentRowIndex = 1
       let item: BarrageItem | null = null
       const IntervalCallback = () => {
         if(curCreateIndex === renders.length){
           return clearInterval(timerId.value)
         }
-        currentRowIndex = Math.ceil(randomNumber(1 , maxLineCount.value)) // 随机一个弹道生成弹幕
+        currentRowIndex = calcAppendLineIndex()
         for (let index = 0; index < props.createNum; index ++) {
           item = renders[curCreateIndex]
           toScriptCreateBarrageItem(item , currentRowIndex)
           curCreateIndex +=  1
           currentRowIndex += 1
+          lastRecordIndex = curCreateIndex // 记住上一次取得index
         }
       }
       timerId.value = setInterval(IntervalCallback , props.createFrequencyTime * 1000)
     }
-    /**
-     * 组件挂在生命周期回调
-     */
-    function lcMountedCallback (){
+    function _init () {
       setInitData()
       loopCreate()
     }
+    const lcMountedCallback = () => _init()
     const barragesWatchCallback = (newVal:BarrageItem[]) => {
        // 如果 没有弹幕 则 不操作
        if(!newVal?.length){
@@ -227,13 +255,15 @@ export default defineComponent({
     const opacityWatchCallback = denounce(() => setBarrageOpacity() , 200)
     watch(() => props.barrages , barragesWatchCallback , { deep: true , immediate: true })
     watch(() => props.opacity , opacityWatchCallback , { immediate: true })
+    watch(() => props.pausedFlag , () => pausedAllBarrage() )
     onMounted(lcMountedCallback)
     expose(useExpose())
     return {
       barrageWapperRef,
       topWapperRef,
       bottomWapperRef,
-      create
+      create,
+      reset
     }
   }
 })

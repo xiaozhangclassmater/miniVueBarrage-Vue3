@@ -1,6 +1,6 @@
 <template>
   <div class="panel-wapper">
-    <miniVueBarrage :barrages="barrages" fullScreen :opacity="opacityValue" ref="barrageRef">
+    <miniVueBarrage :barrages="barrages" fullScreen :opacity="opacityValue" :pausedFlag="barragePaused" :createFrequencyTime="0.5"  ref="barrageRef">
       <template #icon>
         <div class="icon"></div>
       </template>
@@ -43,9 +43,9 @@
             <div>实时弹幕总数：100</div>
           </div>
           <div class="button-groups margin-t-8 flex-wapper">
-            <el-button type="warning">重置弹幕</el-button>
+            <el-button type="warning" @click="resetHandle" >重置弹幕</el-button>
             <el-button type="danger">清空</el-button>
-            <el-button type="info" @click="addHandle()">添加弹幕</el-button>
+            <el-button type="info" @click="addHandle">添加弹幕</el-button>
             <el-button type="primary">发送</el-button>
           </div>
         </div>
@@ -77,6 +77,9 @@ const addHandle = () => {
     id: 1,
     type: 'myuser'
   })
+}
+const resetHandle = () => {
+  barrageRef.value?.reset()
 }
 </script>
 

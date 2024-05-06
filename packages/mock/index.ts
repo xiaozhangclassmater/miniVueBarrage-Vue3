@@ -12,15 +12,15 @@ export const  barrageDatas = [
     content: '都怕死的怕是'
   },
   {
-    content: '都怕死的怕是'
+    content: '1111'
   },{
-    content: '都怕死的怕是'
+    content: '都怕死111的怕是'
   },
   {
-    content: '都怕死的怕是'
+    content: '111'
   },
   {
-    content: '都怕死的怕是'
+    content: 'asdsdasddas'
   },
   {
     content: '的撒好看的'

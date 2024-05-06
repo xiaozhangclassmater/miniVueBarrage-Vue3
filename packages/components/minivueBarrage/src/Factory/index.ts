@@ -8,6 +8,11 @@ export const buildProps = <T>() => {
       type: Array<BarrageItem>,
       default: ()=>([])
     },
+    // 是否暂停
+    pausedFlag: {
+      type: Boolean,
+      default: false
+    },
     // 图标是否从 开始位置显示 ，反之 末尾显示
     startIcon: {
       type: Boolean,
@@ -40,6 +45,10 @@ export const buildProps = <T>() => {
     opacity: {
       type: [Number , String],
       default: 1
+    },
+    baseLineHeight: {
+      type: Number,
+      default: 10
     }
   }
 }
