@@ -20,6 +20,13 @@ export interface BarrageItem {
   color?: string,
   type?: barrrageTypeGroup
 }
+export interface emitChageParams  {
+  createCount: number
+}
+export interface emitTypes {
+  (e: 'change', params: emitChageParams ): void
+  (e: 'update:barrages', params: BarrageItem[] ): void
+}
 
 export type playState = 'running' | 'paused'
 

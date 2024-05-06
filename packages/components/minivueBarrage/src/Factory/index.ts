@@ -4,7 +4,7 @@ export * as Barrage from './barrage'
 export { default as BarrageManager } from './barrageManager'
 export const buildProps = <T>() => {
   return {
-    barrages: {
+    modelValue: {
       type: Array<BarrageItem>,
       default: ()=>([])
     },
@@ -45,6 +45,10 @@ export const buildProps = <T>() => {
     opacity: {
       type: [Number , String],
       default: 1
+    },
+    showBarrage: {
+      type: Boolean,
+      default: true
     },
     baseLineHeight: {
       type: Number,

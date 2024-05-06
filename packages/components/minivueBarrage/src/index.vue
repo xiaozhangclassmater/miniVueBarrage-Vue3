@@ -1,5 +1,5 @@
 <template>
-  <div class="barrage-wapper" ref="barrageWapperRef">
+  <div class="barrage-wapper" ref="barrageWapperRef" :style="barrageWapperStyle">
     <div class="top-barrage-wapper" ref="topWapperRef"></div>
     <div class="bottom-barrage-wapper" ref="bottomWapperRef"></div>
   </div>
@@ -15,8 +15,8 @@ import { randomNumber } from './util';
 export default defineComponent({
   name: 'miniVueBarrage',
   props: buildProps() ,
-  emits: ["update:barrages"],
-  setup(props ,{ slots , expose }){
+  emits: ["update:barrages" , "change"],
+  setup(props , { slots , expose , emit}){
     const barrageWapperRef = ref<HTMLDivElement | null>(null)
     const topWapperRef = ref<HTMLDivElement | null>(null)
     const bottomWapperRef = ref<HTMLDivElement | null>(null)
@@ -29,6 +29,9 @@ export default defineComponent({
     let clientWidthList: number[] = [] // 计算下一条弹幕应该在哪个弹道上生成
     const baseHeight = 40 // 弹幕默认的高度
     const calcOpacity = computed(() => `${(Number(props.opacity) / 100) || 0}`)
+    const barrageWapperStyle = computed(() => {
+      return props.showBarrage ? {display: 'block'} : { display: 'none' }
+    })
     /**
      * @description 通过 js 创建弹幕实例
      * @param itemInstance
@@ -47,13 +50,20 @@ export default defineComponent({
       timerId.value = null
 
     }
+    // 清空 弹幕
+    const clear = () => {
+      removeAllChildrenEl()
+      timerId.value && clearInterval(timerId.value)
+      clearData()
+    }
     // 弹幕创建
     const create = (instance: BarrageItem) => {
       if(isEmpty(instance)){ // 传入的实例数据不存在 则 无法添加
         return
       }
-      let minIndex = clientWidthList.findIndex(((item , index) => (item === Math.min(...clientWidthList)))) || 1
-      if(minIndex === lastIndex){  //如果我 刚刚添加的位置 跟此次查找的最小距离位置 相等 ，则 再找一个更合适的
+      // 找到最小的数字弹道 进行添加
+      let minIndex = clientWidthList.findIndex((item => (item === Math.min(...clientWidthList)))) || 1
+      if(minIndex === lastIndex){  //如果 刚刚添加的位置 跟此 次查找的最小距离位置 相等 ，则 再找一个更合适的
         minIndex = clientWidthList.findIndex(((item , index) => (item === Math.min(...clientWidthList) && index !== lastIndex)))
       }
       lastIndex = minIndex
@@ -91,7 +101,6 @@ export default defineComponent({
     // 移除所有 弹幕 children 元素
     function removeAllChildrenEl () {
       const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
-      console.log('allBarrages' ,allBarrages);
       if(!allBarrages.length) return // 如果没有 子节点 则不操作
       for (const item of allBarrages) {
         item.remove()
@@ -122,7 +131,9 @@ export default defineComponent({
     }
     const appendElement = (currentRowIndex :number) => {
       if(!props.fullScreen){ // 如果非全屏 则 直接 添加到 上层容器
-        return topWapperRef.value?.appendChild(barrageElement)
+        topWapperRef.value?.appendChild(barrageElement)
+        barrageElement.appendChild(barrageIconElement)
+        return
       }
       currentRowIndex >= maxLineCount.value / 2 ? bottomWapperRef.value?.appendChild(barrageElement) : topWapperRef.value?.appendChild(barrageElement)
       barrageElement.appendChild(barrageIconElement)
@@ -175,9 +186,8 @@ export default defineComponent({
     function toScriptCreateBarrageItem (itemInstance : BarrageItem , currentRowIndex: number) {
       const createIconInstance = slots?.icon as Function
       const iconVnode = createIconInstance()?.[0] || false
-
+      console.log('iconVnode' , iconVnode);
       const top = (currentRowIndex === 0) ? props.baseLineHeight : (baseHeight * currentRowIndex + props.baseLineHeight)
-      // console.log('(baseHeight * currentRowIndex) - ((baseHeight - 10) / (maxLineCount.value - 1))' ,top);
       const defaultItemInstance = {...itemInstance, top}
       barrageElement = document.createElement('div')
       barrageIconElement = document.createElement('div')
@@ -185,7 +195,6 @@ export default defineComponent({
       if(iconVnode){
         render(iconVnode , barrageIconElement)
       }
-      console.log('clientWidthList------------1' , clientWidthList);
       setElementAttrs(defaultItemInstance) // 设置元素的属性
       appendElement(currentRowIndex) // 添加弹幕到容器中
       setElementStyleAttrs(defaultItemInstance , currentRowIndex) // 设置弹幕的样式动画属性等
@@ -193,7 +202,6 @@ export default defineComponent({
     }
     function setElementStyleAttrs (instance: BarrageItem , index: number) {
       const curIndex = index
-      console.log('index---------index' , index);
       const elStyle = barrageElement.style
       const instanceClientWidth = barrageElement?.clientWidth || 0
       const offsetRightValue = randomNumber() + instanceClientWidth
@@ -234,6 +242,7 @@ export default defineComponent({
           curCreateIndex +=  1
           currentRowIndex += 1
           lastRecordIndex = curCreateIndex // 记住上一次取得index
+          emit('change', { renderCount: curCreateIndex })
         }
       }
       timerId.value = setInterval(IntervalCallback , props.createFrequencyTime * 1000)
@@ -253,17 +262,21 @@ export default defineComponent({
       }
     }
     const opacityWatchCallback = denounce(() => setBarrageOpacity() , 200)
-    watch(() => props.barrages , barragesWatchCallback , { deep: true , immediate: true })
+    const showBarrageWatchCallback = (newVal) => newVal ? _init(): clear()
+    watch(() => props.modelValue , barragesWatchCallback , { deep: true , immediate: true })
     watch(() => props.opacity , opacityWatchCallback , { immediate: true })
     watch(() => props.pausedFlag , () => pausedAllBarrage() )
+    watch(() => props.showBarrage , showBarrageWatchCallback)
     onMounted(lcMountedCallback)
     expose(useExpose())
     return {
+      barrageWapperStyle,
       barrageWapperRef,
       topWapperRef,
       bottomWapperRef,
       create,
-      reset
+      reset,
+      clear
     }
   }
 })

@@ -1,6 +1,15 @@
 <template>
   <div class="panel-wapper">
-    <miniVueBarrage :barrages="barrages" fullScreen :opacity="opacityValue" :pausedFlag="barragePaused" :createFrequencyTime="0.5"  ref="barrageRef">
+    <miniVueBarrage v-model="barrages"
+      :fullScreen="fullScreenSwitch"
+      :showBarrage="showBarrage"
+      :opacity="opacityValue"
+      :pausedFlag="barragePaused"
+      :createFrequencyTime="0.3"
+      ref="barrageRef"
+      @change="changeHandle"
+
+       >
       <template #icon>
         <div class="icon"></div>
       </template>
@@ -40,11 +49,14 @@
             <el-switch v-model="showBarrage"    style="--el-switch-on-color: #13ce66 ; --el-switch-off-color: #b2b2b2"/>
           </div>
           <div class="flex-wapper margin-t-8">
-            <div>实时弹幕总数：100</div>
+            <div>实时弹幕总数：{{barrages.length}}</div>
+          </div>
+          <div class="flex-wapper margin-t-8">
+            <div>已渲染总数： {{curRenderCount}}</div>
           </div>
           <div class="button-groups margin-t-8 flex-wapper">
             <el-button type="warning" @click="resetHandle" >重置弹幕</el-button>
-            <el-button type="danger">清空</el-button>
+            <el-button type="danger" @click="clearHandle">清空</el-button>
             <el-button type="info" @click="addHandle">添加弹幕</el-button>
             <el-button type="primary">发送</el-button>
           </div>
@@ -63,10 +75,11 @@ const barrages = [...barrageDatas]
 const opacityValue = ref(100)
 const barrageRef= ref<InstanceType<typeof miniVueBarrage> >()
 const barrageHeightValue = ref(35)
-const fullScreenSwitch = ref(false)
+const fullScreenSwitch = ref(true)
 const showBarrage = ref(true)
 const barragePaused = ref(false)
 const barrageContent = ref('')
+const curRenderCount = ref(0)
 const times = ref(1)
 const addHandle = () => {
   if(!barrageContent.value){
@@ -78,8 +91,14 @@ const addHandle = () => {
     type: 'myuser'
   })
 }
+const changeHandle = (params ) => {
+  curRenderCount.value = params.renderCount
+}
 const resetHandle = () => {
   barrageRef.value?.reset()
+}
+const clearHandle = () => {
+  barrageRef.value?.clear()
 }
 </script>
 
