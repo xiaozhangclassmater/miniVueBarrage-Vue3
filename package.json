@@ -16,6 +16,7 @@
     ]
   },
   "dependencies": {
+    "element-plus": "^2.7.1",
     "normalize.css": "^8.0.1",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5"
