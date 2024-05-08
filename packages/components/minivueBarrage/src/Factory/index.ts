@@ -39,25 +39,35 @@ export const buildProps = <T>() => {
       type: Number,
       default: 0.8
     },
+    //一次性 创建几条
     createNum: {
       type: Number,
       default: 1
     },
+    // 弹幕的透明度
     opacity: {
       type: [Number , String],
       default: 1
     },
+    //是否显示弹幕
     showBarrage: {
       type: Boolean,
       default: true
     },
+    //弹幕的基本行高
     baseLineHeight: {
       type: Number,
       default: 10
     },
+    // 弹幕的颜色
     color: {
       type: String,
       default: '#000'
+    },
+    // 弹幕高度
+    heigth: {
+      type: [String , Number],
+      default: '35px'
     }
   }
 }

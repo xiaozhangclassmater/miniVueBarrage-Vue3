@@ -7,6 +7,7 @@
       :pausedFlag="barragePaused"
       :createFrequencyTime="0.3"
       :color="'#dff'"
+      :delay="times"
       ref="barrageRef"
       @change="changeHandle"
        >
@@ -34,7 +35,7 @@
           </div>
           <div class="flex-wapper margin-t-8">
             <div>渲染频率：</div>
-            <el-input class="el-input-wapper" v-model="times" style="width: 220px" placeholder="渲染频率(s)" />
+            <el-input class="el-input-wapper"   v-model="times" style="width: 220px" placeholder="渲染频率(s)" />
           </div>
           <div class="flex-wapper margin-t-8">
             <div>弹幕显示（是否全屏）</div>

@@ -1,5 +1,5 @@
 <template>
-  <miniVueBarrage v-model="barrages"fullScreen/>
+  <miniVueBarrage  v-model="barrages"fullScreen/>
   </template>
 
 <script lang="ts" setup>
