@@ -9,5 +9,6 @@ export const KEYGROUP = {
 }
 
 export const CSSKEY = {
-  OPACITY: 'opacity'
+  OPACITY: 'opacity',
+  COLOR: 'color'
 }

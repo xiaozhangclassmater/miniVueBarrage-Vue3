@@ -2,6 +2,7 @@ import { BarrageItem } from '../types'
 
 export * as Barrage from './barrage'
 export { default as BarrageManager } from './barrageManager'
+
 export const buildProps = <T>() => {
   return {
     modelValue: {
@@ -53,6 +54,10 @@ export const buildProps = <T>() => {
     baseLineHeight: {
       type: Number,
       default: 10
+    },
+    color: {
+      type: String,
+      default: '#000'
     }
   }
 }

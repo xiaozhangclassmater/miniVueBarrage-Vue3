@@ -1,13 +1,13 @@
 <template>
   <div class="barrage-wapper" ref="barrageWapperRef" :style="barrageWapperStyle">
     <div class="top-barrage-wapper" ref="topWapperRef"></div>
-    <div class="bottom-barrage-wapper" ref="bottomWapperRef"></div>
+    <div class="bottom-barrage-wapper" ref="bottomWapperRef" ></div>
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, render, watch } from 'vue';
-import { denounce, getStyleValue, isEmpty, unitToValue, useExpose } from '../../../utils';
+import { denounce, errorCatchCallHandle, getStyleValue, isEmpty, unitToValue, useExpose } from '../../../utils';
 import { CSSKEY, KEYGROUP, PLAYSTATEGROUP } from './constant';
 import { BarrageManager, buildProps } from './Factory';
 import { BarrageItem } from './types';
@@ -15,7 +15,7 @@ import { randomNumber } from './util';
 export default defineComponent({
   name: 'miniVueBarrage',
   props: buildProps() ,
-  emits: ["update:barrages" , "change"],
+  emits: ["update:barrages" , "change" , "complete"],
   setup(props , { slots , expose , emit}){
     const barrageWapperRef = ref<HTMLDivElement | null>(null)
     const topWapperRef = ref<HTMLDivElement | null>(null)
@@ -28,9 +28,13 @@ export default defineComponent({
     let lastRecordIndex = -1
     let clientWidthList: number[] = [] // 计算下一条弹幕应该在哪个弹道上生成
     const baseHeight = 40 // 弹幕默认的高度
-    const calcOpacity = computed(() => `${(Number(props.opacity) / 100) || 0}`)
+    const calcOpacity = computed(() => {
+      if(!props.opacity) return `0`
+      const opacityValue = Number(props.opacity) || 1
+      return `${opacityValue > 1 ? opacityValue / 100 : opacityValue}`
+    })
     const barrageWapperStyle = computed(() => {
-      return props.showBarrage ? {display: 'block'} : { display: 'none' }
+      return props.showBarrage ? { display: 'block'} : { display: 'none' }
     })
     /**
      * @description 通过 js 创建弹幕实例
@@ -84,7 +88,23 @@ export default defineComponent({
     }
     // 改变弹幕颜色
     const changeColor = (colorStr: string , id: number) => {
-
+      if(typeof colorStr !== 'string'){
+        return errorCatchCallHandle("请传入字符串类型" , 'warning')
+      }
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      if(!allBarrages.length) return // 如果没有 子节点 则 不要设置 颜色
+      if(id){
+        const renderDatas = BarrageInstance.get() // 获取所有弹幕数据
+        const elementIndex = renderDatas.findIndex(item => item.id === id)
+        const elementNode = allBarrages[elementIndex]  || null
+        if(!elementNode) return
+        elementNode.style.setProperty(CSSKEY.COLOR , `${colorStr || props.color}`)
+      }else{
+        for (const el of allBarrages) {
+          // 循环设置 每个节点的 透明度
+          el.style.setProperty(CSSKEY.COLOR , `${colorStr || props.color}`)
+        }
+      }
     }
     // 关闭弹幕
     const close = () => {
@@ -184,15 +204,14 @@ export default defineComponent({
     }
 
     function toScriptCreateBarrageItem (itemInstance : BarrageItem , currentRowIndex: number) {
-      const createIconInstance = slots?.icon as Function
-      const iconVnode = createIconInstance()?.[0] || false
-      console.log('iconVnode' , iconVnode);
       const top = (currentRowIndex === 0) ? props.baseLineHeight : (baseHeight * currentRowIndex + props.baseLineHeight)
       const defaultItemInstance = {...itemInstance, top}
       barrageElement = document.createElement('div')
       barrageIconElement = document.createElement('div')
       // 如果 vnode元素存在的话 则 渲染成真实dom 挂载到 元素身上
-      if(iconVnode){
+      if(slots?.icon){
+        const createIconInstance = slots.icon as Function
+        const iconVnode = createIconInstance()?.[0]
         render(iconVnode , barrageIconElement)
       }
       setElementAttrs(defaultItemInstance) // 设置元素的属性
@@ -201,14 +220,14 @@ export default defineComponent({
       elAddEventListener()
     }
     function setElementStyleAttrs (instance: BarrageItem , index: number) {
-      const curIndex = index
       const elStyle = barrageElement.style
       const instanceClientWidth = barrageElement?.clientWidth || 0
       const offsetRightValue = randomNumber() + instanceClientWidth
-      clientWidthList[curIndex] = clientWidthList[curIndex] + instanceClientWidth // 将弹道的长度添加数组中
+      clientWidthList[index] = clientWidthList[index] + instanceClientWidth // 将弹道的长度添加数组中
       elStyle.right = `${-offsetRightValue}px`
       elStyle.top = `${instance.top}px`
       elStyle.opacity = `${calcOpacity.value}`
+      elStyle.color = props.color
         // 容器宽度 + 最初 right 偏移值的距离
       elStyle.setProperty('--wapperClientWidth' ,`-${(barrageWapperRef.value?.clientWidth || 0)  + offsetRightValue}px`)
       elStyle.animationName = 'moveLeft'
@@ -233,6 +252,8 @@ export default defineComponent({
       let item: BarrageItem | null = null
       const IntervalCallback = () => {
         if(curCreateIndex === renders.length){
+          //运行完一屏 触发 complete 事件
+          emit('complete')
           return clearInterval(timerId.value)
         }
         currentRowIndex = calcAppendLineIndex()
@@ -262,7 +283,7 @@ export default defineComponent({
       }
     }
     const opacityWatchCallback = denounce(() => setBarrageOpacity() , 200)
-    const showBarrageWatchCallback = (newVal) => newVal ? _init(): clear()
+    const showBarrageWatchCallback = (newVal: boolean) => newVal ? _init(): clear()
     watch(() => props.modelValue , barragesWatchCallback , { deep: true , immediate: true })
     watch(() => props.opacity , opacityWatchCallback , { immediate: true })
     watch(() => props.pausedFlag , () => pausedAllBarrage() )
@@ -276,7 +297,9 @@ export default defineComponent({
       bottomWapperRef,
       create,
       reset,
-      clear
+      clear,
+      close,
+      changeColor
     }
   }
 })

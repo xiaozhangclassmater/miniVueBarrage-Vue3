@@ -1,1 +1,27 @@
-{}
+{
+  "name": "minivuebarrage",
+  "version": "0.0.1",
+  "private": false,
+  "description": "minivuebarrage 是一个轻量级的弹幕组件,支持调节弹幕透明度颜色等丰富功能",
+  "main": "./lib/index.js",
+  "author": {
+    "name": "xiaozhang",
+    "url": "https://github.com/xiaozhangclassmater"
+  },
+  "repository": {
+    "url": "https://github.com/xiaozhangclassmater/miniVueBarrage-Vue3",
+    "type": "github"
+  },
+  "engines": {
+    "node": ">=6.11.5"
+  },
+  "keywords": [
+    "minivuebarrage"
+  ],
+  "license": "MIT",
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

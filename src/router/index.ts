@@ -9,7 +9,8 @@ const router = createRouter({
     },
     {
       path: '/miniVueVBarrage',
-      component: () => import('@p/components/minivueBarrage/src/demo/index.vue')
+      component: () => import('@p/components/minivueBarrage/src/demo/index.vue') // packages
+      // conponent : () => import('@/views/payGround/index.vue')
     }
   ]
 })

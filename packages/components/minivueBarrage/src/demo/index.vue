@@ -6,9 +6,9 @@
       :opacity="opacityValue"
       :pausedFlag="barragePaused"
       :createFrequencyTime="0.3"
+      :color="'#dff'"
       ref="barrageRef"
       @change="changeHandle"
-
        >
       <template #icon>
         <div class="icon"></div>
@@ -91,7 +91,7 @@ const addHandle = () => {
     type: 'myuser'
   })
 }
-const changeHandle = (params ) => {
+const changeHandle = (params: any) => {
   curRenderCount.value = params.renderCount
 }
 const resetHandle = () => {
