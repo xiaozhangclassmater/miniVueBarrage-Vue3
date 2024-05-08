@@ -12,6 +12,27 @@ class BarrageManager {
   constructor(barrages?: BarrageItem[]){
     this.barrages = barrages || []
   }
+  _play() {
+
+  }
+
+  _createBarrage() {
+
+  }
+
+  _close() {
+    this.barrages = []
+  }
+  /**
+   * @description 刷新弹幕
+   */
+  _refresh() {
+
+  }
+  // 初始化弹幕
+  _init() {
+
+  }
   set(values: BarrageItem[]) {
     this.barrages = values
   }

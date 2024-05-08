@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <miniVueBarrage  v-model="barrages"fullScreen/>
   </template>
 
@@ -15,4 +15,4 @@ const barrages = [...barrageDatas]
 
 <style scoped lang="less">
 
-</style>
+</style> -->

@@ -8,20 +8,26 @@ export default defineConfig({
     // 生产配置
       base: './',
       build: {
-        outDir: './dist/lib',
+        outDir: './dist',
         // minify: 'terser',
         // assetsDir: 'assets', //静态资源输出目录
         // cssCodeSplit: true,
         lib: {
           entry: path.resolve(__dirname, './packages/components/index.ts'), // 指定生产打包 入口
           name: 'miniVueBarrage', // 打包完成的名称
-          formats: ['es'], // 打包的 输出的 模式
-          fileName: () => `index.js`
+          formats: ['es' , 'cjs'], // 打包的 输出的 模式
+          fileName: (ModuleFormat) => {
+            if(ModuleFormat === 'es'){
+              return `${ModuleFormat}/index.mjs`
+            }else{
+              return `lib/index.js`
+            }
+          }
         },
         rollupOptions: {
           output:{
             // 设置静态资源输出目录
-            assetFileNames: (assetInfo) => 'assets/minivueBarrage.css'
+            assetFileNames: (assetInfo) => 'lib/minivueBarrage.css'
           },
           external: ['vue'],
         }
@@ -30,14 +36,13 @@ export default defineConfig({
         alias:{
           "@" : path.resolve(__dirname , './src'),
           "@p": path.resolve(__dirname , './packages')
-
         }
       },
       plugins: [
         vue(),
         copy({
           targets: [
-            { src: 'packages/package.json', dest: 'dist' },
+            { src: 'packages/package.json', dest: 'dist/' },
           ],
           copyOnce: true
         })
