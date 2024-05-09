@@ -56,10 +56,12 @@
             <div>已渲染总数： {{curRenderCount}}</div>
           </div>
           <div class="button-groups margin-t-8 flex-wapper">
+            <el-button type="success" @click="startHandle" >开始</el-button>
             <el-button type="warning" @click="resetHandle" >重置弹幕</el-button>
             <el-button type="danger" @click="clearHandle">清空</el-button>
             <el-button type="info" @click="addHandle">添加弹幕</el-button>
             <el-button type="primary">发送</el-button>
+
           </div>
         </div>
       </div>
@@ -89,8 +91,11 @@ const addHandle = () => {
   barrageRef.value?.create({
     content: barrageContent.value,
     id: 1,
-    type: 'myuser'
+    type: 'user'
   })
+}
+const startHandle = () => {
+  barrageRef.value?.start()
 }
 const changeHandle = (params: any) => {
   curRenderCount.value = params.renderCount

@@ -26,11 +26,11 @@ yarn add minivuebarrage@0.3.5
 ~~~shell
 
 # yarn Vue3
-yarn add minivuebarrage@1.0.1 
-		
+yarn add minivuebarrage@1.0.1
+
 or
 # npm Vue3
-npm i minivuebarrage@1.0.1 
+npm i minivuebarrage@1.0.1
 
 ~~~
 
@@ -87,71 +87,11 @@ const barrages = ref([])
 
 ## Usage
 
-~~~vue
-<template>
-  <div class="panel-wapper">
-    <miniVueBarrage v-model="barrages"
-      :fullScreen="fullScreenSwitch"
-      :showBarrage="showBarrage"
-      :opacity="opacityValue"
-      :pausedFlag="barragePaused"
-      :createFrequencyTime="times"
-      :color="'#000'"
-      :bgColor="'#ddd'"
-      ref="barrageRef"
-      @change="changeHandle">
-      <template #icon>
-        <div class="icon"></div>
-      </template>
-    </miniVueBarrage>
-   <div/>
-</template>
 
-<script lang="ts" setup>
-import { ref } from 'vue';
-import { barrageDatas } from '../../../../mock';
-import miniVueBarrage from '../index.vue';
-const barrages = [...barrageDatas]
-const opacityValue = ref(100)
-const barrageRef= ref<InstanceType<typeof miniVueBarrage> >()
-const barrageHeightValue = ref(35)
-const fullScreenSwitch = ref(true)
-const showBarrage = ref(true)
-const barragePaused = ref(false)
-const barrageContent = ref('')
-const curRenderCount = ref(0)
-const times = ref(1)
-const addHandle = () => {
-  if(!barrageContent.value){
-    return
-  }
-  barrageRef.value?.create({
-    content: barrageContent.value,
-    id: 1,
-    type: 'myuser'
-  })
-}
-const changeHandle = (params: any) => {
-  curRenderCount.value = params.renderCount
-}
-const resetHandle = () => {
-  barrageRef.value?.reset()
-}
-const clearHandle = () => {
-  barrageRef.value?.clear()
-}
-</script>
-
-
-~~~
 
 ## Configuration
 
 There are some useful options
-
-
-
-### Attributes
 
 | 参数                | 说明                                    | 类型             | 可选值       | 默认值  |
 | ------------------- | --------------------------------------- | ---------------- | ------------ | ------- |
@@ -169,43 +109,4 @@ There are some useful options
 | color               | 弹幕的文字颜色                          | String           | --           | #000    |
 | heigth              | 弹幕高度                                | Number \| String | --           | 35px    |
 | bgColor             | 弹幕的背景颜色                          | String           | #xxx \| rgba | #fec821 |
-
-### Slots
-
-| 插槽名称 | 说明                  |
-| -------- | --------------------- |
-| icon     | 用于弹幕 显示图标插槽 |
-
-### Events
-
-| 事件名称 | 说明                           |                         |
-| -------- | ------------------------------ | ----------------------- |
-| change   | 弹幕每次创建或者发生改变时触发 | (params : object) => {} |
-| complete | 弹幕所有数据运行完成触发       | ()  => {}               |
-
-### instance methods
-
-~~~ts
-export type barrrageTypeGroup = 'default' | 'user' 
-export interface BarrageItem {
-  id?: number, //弹幕id
-  delay?: number, // 当前弹幕运行一屏的时间
-  iconUrl?: string, // 弹幕需要图标的 url
-  content: string, // 弹幕文本内容
-  color?: string, // 当前弹幕的文字颜色
-  bgColor?: string // 当前弹幕的背景颜色
-  type?: barrrageTypeGroup // 弹幕的类型  如果为user 则 添加 user的样式
-}
-~~~
-
-
-
-| 方法名称    | 说明                             | 参数        |
-| ----------- | -------------------------------- | ----------- |
-| create      | 创建一条弹幕                     | BarrageItem |
-| reset       | 重置弹幕                         |             |
-| clear       | 清屏，将当前屏幕上的弹幕全部清除 |             |
-| close       | 关闭弹幕                         |             |
-| start       | 重新运行一屏弹幕                 |             |
-| changeColor | 改变弹幕的颜色                   |             |
 

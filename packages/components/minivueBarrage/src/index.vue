@@ -48,11 +48,11 @@ export default defineComponent({
       return props.fullScreen ? count : Math.ceil(count / 2)
     })
     const clearData = () => {
+      emit("change" , { renderCount: 0 })
       lastIndex = -1
       lastRecordIndex = -1,
       clientWidthList = []
       timerId.value = null
-
     }
     // 清空 弹幕
     const clear = () => {
@@ -113,10 +113,17 @@ export default defineComponent({
     }
     // 重置弹幕
     const reset = () => {
+      emit("change" , { renderCount: 0 })
       removeAllChildrenEl()
       clearInterval(timerId.value)
       clearData()
       _init()
+    }
+    const start = () => {
+      if(!timerId.value){
+        clearData()
+        _init()
+      }
     }
     // 移除所有 弹幕 children 元素
     function removeAllChildrenEl () {
@@ -192,7 +199,7 @@ export default defineComponent({
       barrageElement.setAttribute(KEYGROUP.RUNNINGSTATE , PLAYSTATEGROUP.RUNNING) // 设置 初始化运行状态
       barrageElement.classList.add('item-wapper')
       props.startIcon && barrageElement.classList.add('reverse-icon')
-      instance.type === 'myuser' && barrageElement.classList.add('my-user-item-wapper-style')
+      instance.type === 'user' && barrageElement.classList.add('my-user-item-wapper-style')
 
     }
     /**
@@ -224,11 +231,11 @@ export default defineComponent({
       const instanceClientWidth = barrageElement?.clientWidth || 0
       const offsetRightValue = randomNumber() + instanceClientWidth
       clientWidthList[index] = clientWidthList[index] + instanceClientWidth // 将弹道的长度添加数组中
-      elStyle.backgroundColor = props.bgColor
+      elStyle.backgroundColor = instance.bgColor ||  props.bgColor
       elStyle.right = `${-offsetRightValue}px`
       elStyle.top = `${instance.top}px`
       elStyle.opacity = `${calcOpacity.value}`
-      elStyle.color = props.color
+      elStyle.color = instance.color ||  props.color
         // 容器宽度 + 最初 right 偏移值的距离
       elStyle.setProperty('--wapperClientWidth' ,`-${(barrageWapperRef.value?.clientWidth || 0)  + offsetRightValue}px`)
       elStyle.animationName = 'moveLeft'
@@ -300,6 +307,7 @@ export default defineComponent({
       reset,
       clear,
       close,
+      start,
       changeColor
     }
   }
