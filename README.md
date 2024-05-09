@@ -183,7 +183,7 @@ const clearHandle = () => {
 | color               | 弹幕的文字颜色                                         | String           | --           | #000    |
 | heigth              | 弹幕高度                                               | Number \| String | --           | 35px    |
 | bgColor             | 弹幕的背景颜色                                         | String           | #xxx \| rgba | #fec821 |
-| batchDestroy        | 是否需要批量删除弹幕，一次性销毁，提高性能（可选选项） | Boolean          | --           | false   |
+| batchDestroy        | 是否需要批量删除弹幕，一次性销毁，提高性能（可选选项） | Boolean          | 50           | false   |
 
 ### Slots
 

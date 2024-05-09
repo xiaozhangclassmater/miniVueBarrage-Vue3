@@ -7,7 +7,7 @@
       :opacity="opacityValue"
       :pausedFlag="barragePaused"
       :createFrequencyTime="times"
-      :delay="1"
+      :delay="12"
       :color="'#000'"
       :bgColor="'#ddd'"
       ref="barrageRef"
