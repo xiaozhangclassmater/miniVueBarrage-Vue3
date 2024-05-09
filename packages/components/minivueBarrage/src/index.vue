@@ -224,6 +224,7 @@ export default defineComponent({
       const instanceClientWidth = barrageElement?.clientWidth || 0
       const offsetRightValue = randomNumber() + instanceClientWidth
       clientWidthList[index] = clientWidthList[index] + instanceClientWidth // 将弹道的长度添加数组中
+      elStyle.backgroundColor = props.bgColor
       elStyle.right = `${-offsetRightValue}px`
       elStyle.top = `${instance.top}px`
       elStyle.opacity = `${calcOpacity.value}`

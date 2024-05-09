@@ -5,9 +5,9 @@
       :showBarrage="showBarrage"
       :opacity="opacityValue"
       :pausedFlag="barragePaused"
-      :createFrequencyTime="0.3"
-      :color="'#dff'"
-      :delay="times"
+      :createFrequencyTime="times"
+      :color="'#000'"
+      :bgColor="'#ddd'"
       ref="barrageRef"
       @change="changeHandle"
        >

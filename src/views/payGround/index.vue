@@ -1,16 +1,13 @@
 <!-- <template>
   <miniVueBarrage  v-model="barrages"fullScreen/>
-  </template>
+</template>
 
 <script lang="ts" setup>
-import { miniVueBarrage } from '../../../dist/lib';
-import '../../../dist/lib/assets/minivueBarrage.css';
-
-// import { miniVueBarrage } from '../../../dist/miniVueBarrage';
+import { miniVueBarrage } from '../../../dist/miniVueBarrage';
+import '../../../dist/miniVueBarrage/lib/index.css';
 
 import { barrageDatas } from '../../../packages/mock/index';
 const barrages = [...barrageDatas]
-// console.log('miniVueBarrage' , );miniVueBarrage
 </script>
 
 <style scoped lang="less">

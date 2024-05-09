@@ -37,7 +37,7 @@ export const buildProps = <T>() => {
     // 创建频率的秒数
     createFrequencyTime: {
       type: Number,
-      default: 0.8
+      default: 1
     },
     //一次性 创建几条
     createNum: {
@@ -63,6 +63,11 @@ export const buildProps = <T>() => {
     color: {
       type: String,
       default: '#000'
+    },
+    // 弹幕的背景颜色
+    bgColor:{
+      type: String,
+      default: '#fec821'
     },
     // 弹幕高度
     heigth: {
