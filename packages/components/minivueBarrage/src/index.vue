@@ -17,6 +17,8 @@ export default defineComponent({
   props: buildProps() ,
   emits: ["update:barrages" , "change" , "complete"],
   setup(props , { slots , expose , emit}){
+    const baseBatchDestoryNum = 50 // 批量删除弹幕数量的基准值
+    let curentFinishRunningNum = 0 // 当前弹幕完成运行的总数
     const barrageWapperRef = ref<HTMLDivElement | null>(null)
     const topWapperRef = ref<HTMLDivElement | null>(null)
     const bottomWapperRef = ref<HTMLDivElement | null>(null)
@@ -29,7 +31,7 @@ export default defineComponent({
     let clientWidthList: number[] = [] // 计算下一条弹幕应该在哪个弹道上生成
     const baseHeight = 40 // 弹幕默认的高度
     const calcOpacity = computed(() => {
-      if(!props.opacity) return `0`
+      if(!props.opacity) return '0'
       const opacityValue = Number(props.opacity) || 1
       return `${opacityValue > 1 ? opacityValue / 100 : opacityValue}`
     })
@@ -52,6 +54,7 @@ export default defineComponent({
       lastIndex = -1
       lastRecordIndex = -1,
       clientWidthList = []
+      curentFinishRunningNum = 0
       timerId.value = null
     }
     // 清空 弹幕
@@ -72,6 +75,17 @@ export default defineComponent({
       }
       lastIndex = minIndex
       toScriptCreateBarrageItem(instance , minIndex)
+    }
+    // 批量删除 弹幕元素
+    const batchRemoveBarrageEl = () => {
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      if(!allBarrages.length) return // 如果没有 子节点 则不操作
+      const awaitDestoryEls = allBarrages.filter(item  => item.getAttribute(KEYGROUP.RUNNINGSTATE) === PLAYSTATEGROUP.END) // 等待被批量删除的 弹幕元素数组
+      for (const el of awaitDestoryEls) {
+        el.remove()
+      }
+      //批量删除完成后 重置 当前完成运行的总数
+      curentFinishRunningNum = 0
     }
     // 暂停所有弹幕
     const pausedAllBarrage = () => {
@@ -172,18 +186,24 @@ export default defineComponent({
       /**
        *鼠标移入弹幕时 进行弹幕暂停
        */
-      const mouseenterCallback = (e : MouseEvent) => {
+      const mouseenterCallback = (e: MouseEvent) => {
         const currentClickDom = e.target as HTMLDivElement
         currentClickDom.style.animationPlayState = PLAYSTATEGROUP.PAUSED
       }
-      const mouseLeaveCallback = (e : MouseEvent) => {
+      const mouseLeaveCallback = (e: MouseEvent) => {
         const currentClickDom = e.target as HTMLDivElement
         currentClickDom.style.animationPlayState = PLAYSTATEGROUP.RUNNING
       }
-      const animationendCallback = () => {
-        barrageElement.setAttribute(KEYGROUP.RUNNINGSTATE ,PLAYSTATEGROUP.END)
+      const animationendCallback = (e: AnimationEvent) => {
+        const el = e.target as HTMLElement
+        if(!props.batchDestroy){
+          return el?.remove() //移除本身
+        }
+        curentFinishRunningNum += 1
+        // 当前完成运行的总数 等于 设置的基准值时进行弹幕的批量删除
+        el.setAttribute(KEYGROUP.RUNNINGSTATE , PLAYSTATEGROUP.END)
+        curentFinishRunningNum === baseBatchDestoryNum && batchRemoveBarrageEl()
       }
-
       barrageElement.addEventListener('mouseenter' , mouseenterCallback)
       barrageElement.addEventListener('mouseleave' , mouseLeaveCallback)
       barrageElement.addEventListener('animationend' , animationendCallback)
@@ -205,10 +225,7 @@ export default defineComponent({
     /**
      * @description 计算添加 弹幕添加到哪个 弹道中
      */
-    const calcAppendLineIndex = (): number => {
-      const minIndex = clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
-      return minIndex
-    }
+    const calcAppendLineIndex = (): number => clientWidthList.findIndex(item => item === Math.min(...clientWidthList))
 
     function toScriptCreateBarrageItem (itemInstance : BarrageItem , currentRowIndex: number) {
       const top = (currentRowIndex === 0) ? props.baseLineHeight : (baseHeight * currentRowIndex + props.baseLineHeight)
@@ -291,7 +308,7 @@ export default defineComponent({
       }
     }
     const opacityWatchCallback = denounce(() => setBarrageOpacity() , 200)
-    const showBarrageWatchCallback = (newVal: boolean) => newVal ? _init(): clear()
+    const showBarrageWatchCallback = (newVal: boolean) => newVal ? start(): clear()
     watch(() => props.modelValue , barragesWatchCallback , { deep: true , immediate: true })
     watch(() => props.opacity , opacityWatchCallback , { immediate: true })
     watch(() => props.pausedFlag , () => pausedAllBarrage() )

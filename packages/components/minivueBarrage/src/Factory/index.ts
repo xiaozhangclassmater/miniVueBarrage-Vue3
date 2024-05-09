@@ -14,6 +14,11 @@ export const buildProps = <T>() => {
       type: Boolean,
       default: false
     },
+    // 是否批量删除弹幕 开启此选项可以对页面性能有进一步的提升
+    batchDestroy:{
+      type: Boolean,
+      default: false
+    },
     // 图标是否从 开始位置显示 ，反之 末尾显示
     startIcon: {
       type: Boolean,

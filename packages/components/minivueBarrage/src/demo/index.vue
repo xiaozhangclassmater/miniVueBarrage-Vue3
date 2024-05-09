@@ -1,14 +1,17 @@
 <template>
   <div class="panel-wapper">
-    <miniVueBarrage v-model="barrages"
+    <miniVueBarrage
+      v-model="barrages"
       :fullScreen="fullScreenSwitch"
       :showBarrage="showBarrage"
       :opacity="opacityValue"
       :pausedFlag="barragePaused"
       :createFrequencyTime="times"
+      :delay="1"
       :color="'#000'"
       :bgColor="'#ddd'"
       ref="barrageRef"
+      batchDestroy
       @change="changeHandle"
        >
       <template #icon>
@@ -61,7 +64,6 @@
             <el-button type="danger" @click="clearHandle">清空</el-button>
             <el-button type="info" @click="addHandle">添加弹幕</el-button>
             <el-button type="primary">发送</el-button>
-
           </div>
         </div>
       </div>

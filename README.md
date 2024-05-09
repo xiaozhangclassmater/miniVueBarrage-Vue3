@@ -76,7 +76,7 @@ app.use(miniVueBarrage)
 
 ~~~vue
 <template>
-  <miniVueBarrage v-model="barrages"fullScreen/>
+  <miniVueBarrage v-model="barrages" fullScreen/>
 </template>
 <script lang="ts" setup>
 import { miniVueBarrage } from 'minivuebarrage';
@@ -121,54 +121,69 @@ const barragePaused = ref(false)
 const barrageContent = ref('')
 const curRenderCount = ref(0)
 const times = ref(1)
+export interface BarrageItem {
+  id?: number, //弹幕id
+  delay?: number, // 当前弹幕运行一屏的时间
+  iconUrl?: string, // 弹幕需要图标的 url
+  content: string, // 弹幕文本内容
+  color?: string, // 当前弹幕的文字颜色
+  bgColor?: string // 当前弹幕的背景颜色
+  type?: barrrageTypeGroup // 弹幕的类型  如果为user 则 添加 user的样式
+}
+// 添加弹幕
 const addHandle = () => {
   if(!barrageContent.value){
-    return
+    return 
   }
-  barrageRef.value?.create({
+  const item:BarrageItem = {
     content: barrageContent.value,
     id: 1,
-    type: 'myuser'
-  })
+    type: 'user'
+  }
+  barrageRef.value?.create(item)
 }
+// 重新开始 渲染一屏弹幕
+const startHandle = () => {
+  barrageRef.value?.start()
+}
+// 更新当前渲染的弹幕条数 
 const changeHandle = (params: any) => {
   curRenderCount.value = params.renderCount
 }
+// 重置弹幕 
 const resetHandle = () => {
   barrageRef.value?.reset()
 }
+// 清除弹幕
 const clearHandle = () => {
   barrageRef.value?.clear()
 }
 </script>
-
-
 ~~~
+
+
 
 ## Configuration
 
-There are some useful options
-
-
-
 ### Attributes
 
-| 参数                | 说明                                    | 类型             | 可选值       | 默认值  |
-| ------------------- | --------------------------------------- | ---------------- | ------------ | ------- |
-| modelValue          | 弹幕数组                                | Array            | --           | []      |
-| pausedFlag          | 是否暂停弹幕                            | Boolean          | --           | false   |
-| startIcon           | 图标是否从 开始位置显示 ，反之 末尾显示 | Boolean          | --           | true    |
-| fullScreen          | 是否需要全屏弹幕                        | Boolean          | --           | false   |
-| iconUrlInShow       | iconUrl 存在时 是否需要显示 图标        | Boolean          | --           | true    |
-| delay               | 弹幕运行一屏的秒数                      | Number           | --           | 12      |
-| createFrequencyTime | 创建弹幕频率的秒数                      | Number           | --           | 1       |
-| createNum           | 一次定时器触发创建几条                  | Number           | --           | 1       |
-| opacity             | 弹幕的透明度                            | Number \| String | --           | 1       |
-| showBarrage         | 是否显示弹幕                            | Boolean          | --           | true    |
-| baseLineHeight      | 弹幕的基本行高                          | Number           | --           | 10      |
-| color               | 弹幕的文字颜色                          | String           | --           | #000    |
-| heigth              | 弹幕高度                                | Number \| String | --           | 35px    |
-| bgColor             | 弹幕的背景颜色                          | String           | #xxx \| rgba | #fec821 |
+| 参数                | 说明                                                   | 类型             | 可选值       | 默认值  |
+| ------------------- | ------------------------------------------------------ | ---------------- | ------------ | ------- |
+| modelValue          | 弹幕数组                                               | Array            | --           | []      |
+| pausedFlag          | 是否暂停弹幕                                           | Boolean          | --           | false   |
+| startIcon           | 图标是否从 开始位置显示 ，反之 末尾显示                | Boolean          | --           | true    |
+| fullScreen          | 是否需要全屏弹幕                                       | Boolean          | --           | false   |
+| iconUrlInShow       | iconUrl 存在时 是否需要显示 图标                       | Boolean          | --           | true    |
+| delay               | 弹幕运行一屏的秒数                                     | Number           | --           | 12      |
+| createFrequencyTime | 创建弹幕频率的秒数                                     | Number           | --           | 1       |
+| createNum           | 一次定时器触发创建几条                                 | Number           | --           | 1       |
+| opacity             | 弹幕的透明度                                           | Number \| String | --           | 1       |
+| showBarrage         | 是否显示弹幕                                           | Boolean          | --           | true    |
+| baseLineHeight      | 弹幕的基本行高                                         | Number           | --           | 10      |
+| color               | 弹幕的文字颜色                                         | String           | --           | #000    |
+| heigth              | 弹幕高度                                               | Number \| String | --           | 35px    |
+| bgColor             | 弹幕的背景颜色                                         | String           | #xxx \| rgba | #fec821 |
+| batchDestroy        | 是否需要批量删除弹幕，一次性销毁，提高性能（可选选项） | Boolean          | --           | false   |
 
 ### Slots
 
@@ -200,12 +215,19 @@ export interface BarrageItem {
 
 
 
-| 方法名称    | 说明                             | 参数        |
-| ----------- | -------------------------------- | ----------- |
-| create      | 创建一条弹幕                     | BarrageItem |
-| reset       | 重置弹幕                         |             |
-| clear       | 清屏，将当前屏幕上的弹幕全部清除 |             |
-| close       | 关闭弹幕                         |             |
-| start       | 重新运行一屏弹幕                 |             |
-| changeColor | 改变弹幕的颜色                   |             |
+| 方法名称    | 说明                             | 参数              |
+| ----------- | -------------------------------- | ----------------- |
+| create      | 创建一条弹幕                     | BarrageItem       |
+| reset       | 重置弹幕                         | --                |
+| clear       | 清屏，将当前屏幕上的弹幕全部清除 | --                |
+| close       | 关闭弹幕                         | --                |
+| start       | 重新运行一屏弹幕                 | --                |
+| changeColor | 改变弹幕的颜色                   | { color: '#fff' } |
 
+## License
+
+MIT
+
+### Keywords
+
+ minivuebarrage , barrage , 弹幕 vuebarrage vueBarrage , BARRAGE
