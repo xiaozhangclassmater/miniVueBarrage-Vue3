@@ -1,1 +1,33 @@
-{}
+{
+  "name": "minivuebarrage",
+  "version": "1.0.1",
+  "private": false,
+  "description": "minivuebarrage is a lightweight barrage component that supports rich features such as adjusting the opacity color of the barrage",
+  "main": "./lib/index.js",
+  "module": "./es/index.mjs",
+  "author": {
+    "name": "xiaozhang",
+    "url": "https://github.com/xiaozhangclassmater"
+  },
+  "repository": {
+    "url": "https://github.com/xiaozhangclassmater/miniVueBarrage-Vue3",
+    "type": "github"
+  },
+  "style": "./lib/minivuebarrage.css",
+  "engines": {
+    "node": ">=6.11.5"
+  },
+  "keywords": [
+    "minivuebarrage",
+    "barrage",
+    "弹幕",
+    "vuebarrage",
+    "vueBarrage"
+  ],
+  "license": "MIT",
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

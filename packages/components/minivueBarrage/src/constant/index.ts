@@ -5,9 +5,10 @@ export const PLAYSTATEGROUP = {
 }
 
 export const KEYGROUP = {
-  RUNNINGSTATE: 'runningState'
+  RUNNINGSTATE: 'runningstate'
 }
 
 export const CSSKEY = {
-  OPACITY: 'opacity'
+  OPACITY: 'opacity',
+  COLOR: 'color'
 }

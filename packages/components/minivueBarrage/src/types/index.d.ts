@@ -10,7 +10,7 @@ export interface miniVueBarrageProps {
 
 }
 export type baseType = undefined | string | number | null | object | []
-export type barrrageTypeGroup = 'user' | 'myuser' | 'testUser'
+export type barrrageTypeGroup = 'default' | 'user'
 export interface BarrageItem {
   id?: number,
   delay?: number,
@@ -18,6 +18,7 @@ export interface BarrageItem {
   content: string,
   top?: number
   color?: string,
+  bgColor?: string,
   type?: barrrageTypeGroup
 }
 export interface emitChageParams  {

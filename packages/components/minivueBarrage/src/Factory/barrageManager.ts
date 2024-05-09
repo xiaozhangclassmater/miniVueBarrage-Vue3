@@ -21,7 +21,7 @@ class BarrageManager {
   }
 
   _close() {
-
+    this.barrages = []
   }
   /**
    * @description 刷新弹幕

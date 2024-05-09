@@ -1,4 +1,5 @@
 import { App, Component, getCurrentInstance } from "vue";
+type ErrorType =  'warning' | 'error' | 'info' | 'log'
 export function withInstall<T extends Component> (options: T) {
   (options as any).install = (app : App) => {
     const { name } = options
@@ -11,6 +12,25 @@ export function withInstall<T extends Component> (options: T) {
 
 export const extend = Object.assign
 
+//错误捕获异常抛出
+export function errorCatchCallHandle (errorMesssage: string , type:  ErrorType = 'warning' ) {
+  if(!errorMesssage) return
+  switch (type) {
+    case 'warning':
+      console.warn(errorMesssage)
+      break;
+    case 'error':
+      throw new Error(errorMesssage)
+    case 'info':
+    console.info(errorMesssage)
+    break
+    case 'log':
+    console.log(errorMesssage);
+    default:
+      break;
+  }
+}
+
 export function useExpose<T = Record<string, any>>(apis?: T) {
   const instance = getCurrentInstance();
   if (instance) {
@@ -18,16 +38,14 @@ export function useExpose<T = Record<string, any>>(apis?: T) {
   }
 }
 
-export function denounce (callback : () => void , delay: number) {
+export const denounce = (callback : () => void , delay: number) => {
   let timer: any = null
-  const that:any = this
   return (...args: []) => {
     if(timer){
       clearTimeout(timer)
     }
     timer = setTimeout(() => {
-      console.log('callback' ,callback);
-      callback && callback.apply(that , args)
+      callback && callback.apply(this , args)
     } , delay)
   }
 }

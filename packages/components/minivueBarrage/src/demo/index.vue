@@ -1,14 +1,18 @@
 <template>
   <div class="panel-wapper">
-    <miniVueBarrage v-model="barrages"
+    <miniVueBarrage
+      v-model="barrages"
       :fullScreen="fullScreenSwitch"
       :showBarrage="showBarrage"
       :opacity="opacityValue"
       :pausedFlag="barragePaused"
-      :createFrequencyTime="0.3"
+      :createFrequencyTime="times"
+      :delay="12"
+      :color="'#000'"
+      :bgColor="'#ddd'"
       ref="barrageRef"
+      batchDestroy
       @change="changeHandle"
-
        >
       <template #icon>
         <div class="icon"></div>
@@ -34,7 +38,7 @@
           </div>
           <div class="flex-wapper margin-t-8">
             <div>渲染频率：</div>
-            <el-input class="el-input-wapper" v-model="times" style="width: 220px" placeholder="渲染频率(s)" />
+            <el-input class="el-input-wapper"   v-model="times" style="width: 220px" placeholder="渲染频率(s)" />
           </div>
           <div class="flex-wapper margin-t-8">
             <div>弹幕显示（是否全屏）</div>
@@ -55,6 +59,7 @@
             <div>已渲染总数： {{curRenderCount}}</div>
           </div>
           <div class="button-groups margin-t-8 flex-wapper">
+            <el-button type="success" @click="startHandle" >开始</el-button>
             <el-button type="warning" @click="resetHandle" >重置弹幕</el-button>
             <el-button type="danger" @click="clearHandle">清空</el-button>
             <el-button type="info" @click="addHandle">添加弹幕</el-button>
@@ -88,10 +93,13 @@ const addHandle = () => {
   barrageRef.value?.create({
     content: barrageContent.value,
     id: 1,
-    type: 'myuser'
+    type: 'user'
   })
 }
-const changeHandle = (params ) => {
+const startHandle = () => {
+  barrageRef.value?.start()
+}
+const changeHandle = (params: any) => {
   curRenderCount.value = params.renderCount
 }
 const resetHandle = () => {
