@@ -1,7 +1,7 @@
 <template>
   <div class="barrage-wapper" ref="barrageWapperRef" :style="barrageWapperStyle">
     <div class="top-barrage-wapper" ref="topWapperRef"></div>
-    <div class="bottom-barrage-wapper" ref="bottomWapperRef" ></div>
+    <div class="bottom-barrage-wapper" v-if="fullScreen"  ref="bottomWapperRef" ></div>
   </div>
 </template>
 
@@ -19,6 +19,8 @@ export default defineComponent({
   setup(props , { slots , expose , emit}){
     const baseBatchDestoryNum = 50 // 批量删除弹幕数量的基准值
     let curentFinishRunningNum = 0 // 当前弹幕完成运行的总数
+    let finishBatchDestroyNum = 0
+    let cacheBarrageRenderNum = 0 // 弹幕渲染总数
     const barrageWapperRef = ref<HTMLDivElement | null>(null)
     const topWapperRef = ref<HTMLDivElement | null>(null)
     const bottomWapperRef = ref<HTMLDivElement | null>(null)
@@ -44,7 +46,7 @@ export default defineComponent({
     */
     const maxLineCount = computed(() => {
       const paddingTopValue = Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingTop')))
-      const paddingBottomValue = Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingBottom')))
+      const paddingBottomValue = props.fullScreen ? Number(unitToValue(getStyleValue(barrageWapperRef.value! , 'paddingBottom'))) : 0
       const paddigHeight = paddingTopValue + paddingBottomValue
       const count = barrageWapperRef.value?.clientHeight && Math.floor((barrageWapperRef.value?.clientHeight - paddigHeight) / baseHeight) || 0
       return props.fullScreen ? count : Math.ceil(count / 2)
@@ -78,18 +80,20 @@ export default defineComponent({
     }
     // 批量删除 弹幕元素
     const batchRemoveBarrageEl = () => {
-      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...(bottomWapperRef?.value?.childNodes || [])!] as HTMLDivElement[]
       if(!allBarrages.length) return // 如果没有 子节点 则不操作
       const awaitDestoryEls = allBarrages.filter(item  => item.getAttribute(KEYGROUP.RUNNINGSTATE) === PLAYSTATEGROUP.END) // 等待被批量删除的 弹幕元素数组
       for (const el of awaitDestoryEls) {
         el.remove()
       }
+      //累加 完成批量更新的数量
+      finishBatchDestroyNum += baseBatchDestoryNum
       //批量删除完成后 重置 当前完成运行的总数
       curentFinishRunningNum = 0
     }
     // 暂停所有弹幕
     const pausedAllBarrage = () => {
-      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...(bottomWapperRef?.value?.childNodes || [])!] as HTMLDivElement[]
       if(!allBarrages.length) return // 如果没有 子节点 则不操作
       for (const el of allBarrages) {
         el.style.animationPlayState = props.pausedFlag ? PLAYSTATEGROUP.PAUSED : PLAYSTATEGROUP.RUNNING
@@ -105,7 +109,7 @@ export default defineComponent({
       if(typeof colorStr !== 'string'){
         return errorCatchCallHandle("请传入字符串类型" , 'warning')
       }
-      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...(bottomWapperRef?.value?.childNodes || [])] as HTMLDivElement[]
       if(!allBarrages.length) return // 如果没有 子节点 则 不要设置 颜色
       if(id){
         const renderDatas = BarrageInstance.get() // 获取所有弹幕数据
@@ -141,7 +145,7 @@ export default defineComponent({
     }
     // 移除所有 弹幕 children 元素
     function removeAllChildrenEl () {
-      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...(bottomWapperRef?.value?.childNodes || [])!] as HTMLDivElement[]
       if(!allBarrages.length) return // 如果没有 子节点 则不操作
       for (const item of allBarrages) {
         item.remove()
@@ -155,7 +159,7 @@ export default defineComponent({
      * setBarrageOpacity 函数 提供设置所有节点透明度 和单一节点透明度作用
      */
     const setBarrageOpacity = (id?: number , opacity?: number | string  ) => {
-      const allBarrages = [...topWapperRef.value?.childNodes!, ...bottomWapperRef.value?.childNodes!] as HTMLDivElement[]
+      const allBarrages = [...topWapperRef.value?.childNodes!, ...(bottomWapperRef?.value?.childNodes || [])!] as HTMLDivElement[]
       if(!allBarrages.length) return // 如果没有 子节点 则 不要设置 透明属性
       if(id){ // 设置单个节点 透明度
         const renderDatas = BarrageInstance.get() // 获取所有弹幕数据
@@ -176,7 +180,7 @@ export default defineComponent({
         barrageElement.appendChild(barrageIconElement)
         return
       }
-      currentRowIndex >= maxLineCount.value / 2 ? bottomWapperRef.value?.appendChild(barrageElement) : topWapperRef.value?.appendChild(barrageElement)
+      currentRowIndex >= maxLineCount.value / 2 ? bottomWapperRef?.value?.appendChild(barrageElement) : topWapperRef.value?.appendChild(barrageElement)
       barrageElement.appendChild(barrageIconElement)
     }
     /**
@@ -202,7 +206,10 @@ export default defineComponent({
         curentFinishRunningNum += 1
         // 当前完成运行的总数 等于 设置的基准值时进行弹幕的批量删除
         el.setAttribute(KEYGROUP.RUNNINGSTATE , PLAYSTATEGROUP.END)
-        curentFinishRunningNum === baseBatchDestoryNum && batchRemoveBarrageEl()
+        // 如果 当前完成 运行的弹幕总数 跟 批量删除的基准值 相同 则 进行一次批量删除 或者 弹幕的总数 - 当前完成批量删除的总数 小于 我的基准值 也进行一次批量删除
+        if(curentFinishRunningNum === baseBatchDestoryNum || (cacheBarrageRenderNum - finishBatchDestroyNum < baseBatchDestoryNum)){
+          batchRemoveBarrageEl()
+        }
       }
       barrageElement.addEventListener('mouseenter' , mouseenterCallback)
       barrageElement.addEventListener('mouseleave' , mouseLeaveCallback)
@@ -263,7 +270,7 @@ export default defineComponent({
     /**
      * 设置初始化数据
      */
-    function setInitData() {
+    function setPageInitData() {
       clientWidthList = new Array(maxLineCount.value) // 初始化弹道宽度，下一次应该在何处插入
       for( let i = 0; i < clientWidthList.length; i++ ){
         clientWidthList[i] = randomNumber(1 , 100) // 初始化的时候 来随机 弹道的长度 方便 找到最小插入的地方
@@ -294,7 +301,7 @@ export default defineComponent({
       timerId.value = setInterval(IntervalCallback , props.createFrequencyTime * 1000)
     }
     function _init () {
-      setInitData()
+      setPageInitData()
       loopCreate()
     }
     const lcMountedCallback = () => _init()
@@ -302,17 +309,28 @@ export default defineComponent({
        // 如果 没有弹幕 则 不操作
        if(!newVal?.length){
         // 如果没数据 则判断定时器是否存在 ， 存在则 清除(实现无数据时 清空弹幕功能) 定时去 反之 不处理
+        cacheBarrageRenderNum = 0
         timerId.value && clearInterval(timerId.value)
       }else{
         BarrageInstance.set(newVal) // 设置数据到 管理类中统一管理
+        cacheBarrageRenderNum = newVal?.length || 0
       }
     }
     const opacityWatchCallback = denounce(() => setBarrageOpacity() , 200)
-    const showBarrageWatchCallback = (newVal: boolean) => newVal ? start(): clear()
+    const showBarrageWatchCallback = () => props.showBarrage ? start(): clear()
+    const pausedFlagWatchCallback = () => pausedAllBarrage()
+    const fullScreenWatchCallback = () => {
+      clientWidthList = new Array(maxLineCount.value) // 初始化弹道宽度，下一次应该在何处插入
+      for( let i = 0; i < clientWidthList.length; i++ ){
+        clientWidthList[i] = randomNumber(1 , 100) // 初始化的时候 来随机 弹道的长度 方便 找到最小插入的地方
+      };
+  }
+
     watch(() => props.modelValue , barragesWatchCallback , { deep: true , immediate: true })
     watch(() => props.opacity , opacityWatchCallback , { immediate: true })
-    watch(() => props.pausedFlag , () => pausedAllBarrage() )
+    watch(() => props.pausedFlag , pausedFlagWatchCallback )
     watch(() => props.showBarrage , showBarrageWatchCallback)
+    watch(() => props.fullScreen , fullScreenWatchCallback)
     onMounted(lcMountedCallback)
     expose(useExpose())
     return {

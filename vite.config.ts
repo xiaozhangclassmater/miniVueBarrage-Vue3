@@ -42,7 +42,7 @@ export default defineConfig({
           targets: [
             { src: 'packages/package.json', dest: 'dist/minivuebarrage/' },
             {
-              src: 'README.md', dest: 'dist/minivuebarrage/'
+              src: 'packages/components/minivueBarrage/docs/README.md', dest: 'dist/minivuebarrage/'
             }
           ],
         })

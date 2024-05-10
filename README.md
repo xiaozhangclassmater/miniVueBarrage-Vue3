@@ -1,5 +1,7 @@
 ## minivueBarrage(vue3)
 
+ [![License](https://camo.githubusercontent.com/bf6a5f2cde1eaf9204cc31d0f035889b9af767f2799f0b5e91b83a4620ab2196/687474703a2f2f696d672e736869656c64732e696f2f62616467652f6c6963656e73652d4d49542d627269676874677265656e2e737667)](http://opensource.org/licenses/MIT)
+
 This library is based on a set of barrage plug-ins developed by Vue3. You can complete the barrage scrolling function by registering this plug-in. I hope it can help you.
 
 此库基于Vue开发的一套弹幕插件，你可以通过注册该插件，完成弹幕滚动功能,希望它可以帮助到你。
