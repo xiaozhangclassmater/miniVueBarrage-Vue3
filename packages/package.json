@@ -13,7 +13,7 @@
     "url": "https://github.com/xiaozhangclassmater/miniVueBarrage-Vue3",
     "type": "github"
   },
-  "style": "./lib/minivuebarrage.css",
+  "style": "./lib/index.css",
   "engines": {
     "node": ">=6.11.5"
   },

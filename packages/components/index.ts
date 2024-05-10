@@ -1,7 +1,8 @@
+import { App } from 'vue';
 import miniVueBarrage from './minivueBarrage';
 const version = '1.0.1';
 
-function install (app) {
+function install (app: App) {
   const components = [
     miniVueBarrage
   ]
