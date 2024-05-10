@@ -19,6 +19,7 @@ export interface BarrageItem {
   top?: number
   color?: string,
   bgColor?: string,
+  index?: number,
   type?: barrrageTypeGroup
 }
 export interface emitChageParams  {

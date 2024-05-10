@@ -15,7 +15,7 @@ import { randomNumber } from './util';
 export default defineComponent({
   name: 'miniVueBarrage',
   props: buildProps() ,
-  emits: ["update:barrages" , "change" , "complete"],
+  emits: ["update:barrages" , "change" , "complete" , "click"],
   setup(props , { slots , expose , emit}){
     const baseBatchDestoryNum = 50 // 批量删除弹幕数量的基准值
     let curentFinishRunningNum = 0 // 当前弹幕完成运行的总数
@@ -186,7 +186,7 @@ export default defineComponent({
     /**
      * 添加每个 dom的 监听事件
      */
-    const elAddEventListener = () => {
+    const elAddEventListener = (instance: BarrageItem ) => {
       /**
        *鼠标移入弹幕时 进行弹幕暂停
        */
@@ -197,6 +197,9 @@ export default defineComponent({
       const mouseLeaveCallback = (e: MouseEvent) => {
         const currentClickDom = e.target as HTMLDivElement
         currentClickDom.style.animationPlayState = PLAYSTATEGROUP.RUNNING
+      }
+      const clickEventCallback = (e: MouseEvent) => {
+        emit('click' , instance)
       }
       const animationendCallback = (e: AnimationEvent) => {
         const el = e.target as HTMLElement
@@ -214,6 +217,7 @@ export default defineComponent({
       barrageElement.addEventListener('mouseenter' , mouseenterCallback)
       barrageElement.addEventListener('mouseleave' , mouseLeaveCallback)
       barrageElement.addEventListener('animationend' , animationendCallback)
+      barrageElement.addEventListener('click' , clickEventCallback)
     }
 
     const setElementAttrs = (instance :BarrageItem) => {
@@ -248,7 +252,7 @@ export default defineComponent({
       setElementAttrs(defaultItemInstance) // 设置元素的属性
       appendElement(currentRowIndex) // 添加弹幕到容器中
       setElementStyleAttrs(defaultItemInstance , currentRowIndex) // 设置弹幕的样式动画属性等
-      elAddEventListener()
+      elAddEventListener(defaultItemInstance)
     }
     function setElementStyleAttrs (instance: BarrageItem , index: number) {
       const elStyle = barrageElement.style
@@ -291,7 +295,8 @@ export default defineComponent({
         currentRowIndex = calcAppendLineIndex()
         for (let index = 0; index < props.createNum; index ++) {
           item = renders[curCreateIndex]
-          toScriptCreateBarrageItem(item , currentRowIndex)
+          const assginItem = Object.assign(item , { index: curCreateIndex })
+          toScriptCreateBarrageItem(assginItem , currentRowIndex)
           curCreateIndex +=  1
           currentRowIndex += 1
           lastRecordIndex = curCreateIndex // 记住上一次取得index
