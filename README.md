@@ -233,3 +233,9 @@ MIT
 ### Keywords
 
  minivuebarrage , barrage , 弹幕 vuebarrage vueBarrage , BARRAGE
+
+### 联系我们
+
+喜欢学习的朋友，可以加我微信，进入我们的内部群，一起学习，备注 进群。
+
+![alt text](src/assets/d79b6c304ade99558256a9cc9541276.jpg)

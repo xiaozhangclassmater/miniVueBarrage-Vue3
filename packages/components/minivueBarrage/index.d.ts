@@ -1,3 +1,5 @@
+import { App } from "vue";
+
 export type barrrageTypeGroup = 'default' | 'user'
 export interface BarrageItem {
   id?: number,
@@ -13,7 +15,7 @@ export interface BarrageItem {
 export interface changeParams {
   renderCount: number
 }
-export declare const minivuebarrage: import("vue").DefineComponent<{
+export declare const minivuebarrage: { install(app: App): void; } & import("vue").DefineComponent<{
 } & {
   modelValue: Array<BarrageItem>,
   pausedFlag?: boolean;
@@ -31,11 +33,7 @@ export declare const minivuebarrage: import("vue").DefineComponent<{
   bgColor?: string
   defaultBgColor?: boolean
   heigth?: string | number
-  // click?: (e: MouseEvent , item: BarrageItem) => void
-  // change?: (params: changeParams) => void
-  // complete?: () => void
-  // mouseenter?: (e: MouseEvent , item: BarrageItem) => void
-  // mouseleave?: (e: MouseEvent , item: BarrageItem) => void
+  install? :(app: App<any>) => void
 } ,{}>;
 export default minivuebarrage;
 declare module 'vue' {
