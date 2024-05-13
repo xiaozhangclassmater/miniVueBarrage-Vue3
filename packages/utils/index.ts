@@ -1,29 +1,28 @@
-import { AppContext, getCurrentInstance, Plugin } from "vue";
+import { App, Component, getCurrentInstance } from "vue";
 type ErrorType =  'warning' | 'error' | 'info' | 'log'
 
-export type SFCWithInstall<T> = T & Plugin
+type EventShim = {
+  new (...args: any[]): {
+    $props: {
+      onClick?: (...args: any[]) => void;
+    };
+  };
+};
 
-export type SFCInstallWithContext<T> = SFCWithInstall<T> & {
-  _context: AppContext | null
-}
+export type WithInstall<T> = T & {
+  install(app: App): void;
+} & EventShim;
 
-
-export const withInstall = <T, E extends Record<string, any>>(
-  main: T,
-  extra?: E
-) => {
-  ;(main as SFCWithInstall<T>).install = (app): void => {
-    for (const comp of [main, ...Object.values(extra ?? {})]) {
-      app.component(comp.name, comp)
+export function withInstall<T extends Component>(options: T) {
+  (options as Record<string, unknown>).install = (app: App) => {
+    const { name } = options;
+    if (name) {
+      app.component(name, options);
+      // app.component(camelize(`-${name}`), options);
     }
-  }
+  };
 
-  if (extra) {
-    for (const [key, comp] of Object.entries(extra)) {
-      ;(main as any)[key] = comp
-    }
-  }
-  return main as SFCWithInstall<T> & E
+  return options as WithInstall<T>;
 }
 
 

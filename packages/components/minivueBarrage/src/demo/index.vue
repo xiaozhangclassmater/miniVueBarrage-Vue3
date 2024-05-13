@@ -76,6 +76,18 @@
 </template>
 
 <script lang="ts" setup>
+export type barrrageTypeGroup = 'default' | 'user'
+export interface BarrageItem {
+  id?: number,
+  delay?: number,
+  iconUrl?: string,
+  content: string,
+  top?: number
+  color?: string,
+  bgColor?: string,
+  index?: number,
+  type?: barrrageTypeGroup
+}
 import { ElMessage as Message } from 'element-plus';
 import { ref } from 'vue';
 import { barrageDatas } from '../../../../mock';
@@ -112,17 +124,17 @@ const resetHandle = () => {
 const clearHandle = () => {
   barrageRef.value?.clear()
 }
-const clickHandle = (e , item) => {
-  console.log('item' , item);
+const clickHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target);
 }
 const completeHandle = () => {
   console.log('弹幕运行完成');
 }
-const mouseenterHandle = () => {
-
+const mouseenterHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target , item);
 }
-const mouseleaveHandle = () => {
-
+const mouseleaveHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target , item);
 }
 </script>
 

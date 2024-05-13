@@ -1,10 +1,10 @@
-<!-- <template>
-  <miniVueBarrage  v-model="barrages"fullScreen/>
+<template>
+  <miniVueBarrage   v-model="barrages" fullScreen :bgColor="'111'" />
 </template>
 
 <script lang="ts" setup>
-import { miniVueBarrage } from '../../../dist/miniVueBarrage';
-import '../../../dist/miniVueBarrage/lib/index.css';
+// import { miniVueBarrage } from '../../../dist/miniVueBarrage';
+// import '../../../dist/miniVueBarrage/lib/index.css';
 
 import { barrageDatas } from '../../../packages/mock/index';
 const barrages = [...barrageDatas]
@@ -12,4 +12,4 @@ const barrages = [...barrageDatas]
 
 <style scoped lang="less">
 
-</style> -->
+</style>

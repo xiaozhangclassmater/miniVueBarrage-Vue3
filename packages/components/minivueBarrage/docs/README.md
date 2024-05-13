@@ -160,6 +160,18 @@ const resetHandle = () => {
 const clearHandle = () => {
   barrageRef.value?.clear()
 }
+const clickHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target);
+}
+const completeHandle = () => {
+  console.log('弹幕运行完成');
+}
+const mouseenterHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target , item);
+}
+const mouseleaveHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target , item);
+}
 </script>
 ~~~
 
