@@ -1,5 +1,7 @@
 ## minivueBarrage(vue3)
 
+ [![License](https://camo.githubusercontent.com/bf6a5f2cde1eaf9204cc31d0f035889b9af767f2799f0b5e91b83a4620ab2196/687474703a2f2f696d672e736869656c64732e696f2f62616467652f6c6963656e73652d4d49542d627269676874677265656e2e737667)](http://opensource.org/licenses/MIT)
+
 This library is based on a set of barrage plug-ins developed by Vue3. You can complete the barrage scrolling function by registering this plug-in. I hope it can help you.
 
 此库基于Vue开发的一套弹幕插件，你可以通过注册该插件，完成弹幕滚动功能,希望它可以帮助到你。
@@ -26,11 +28,11 @@ yarn add minivuebarrage@0.3.5
 ~~~shell
 
 # yarn Vue3
-yarn add minivuebarrage@1.0.1 
-		
+yarn add minivuebarrage@1.0.1
+
 or
 # npm Vue3
-npm i minivuebarrage@1.0.1 
+npm i minivuebarrage@1.0.1
 
 ~~~
 
@@ -133,7 +135,7 @@ export interface BarrageItem {
 // 添加弹幕
 const addHandle = () => {
   if(!barrageContent.value){
-    return 
+    return
   }
   const item:BarrageItem = {
     content: barrageContent.value,
@@ -146,11 +148,11 @@ const addHandle = () => {
 const startHandle = () => {
   barrageRef.value?.start()
 }
-// 更新当前渲染的弹幕条数 
+// 更新当前渲染的弹幕条数
 const changeHandle = (params: any) => {
   curRenderCount.value = params.renderCount
 }
-// 重置弹幕 
+// 重置弹幕
 const resetHandle = () => {
   barrageRef.value?.reset()
 }
@@ -201,7 +203,7 @@ const clearHandle = () => {
 ### instance methods
 
 ~~~ts
-export type barrrageTypeGroup = 'default' | 'user' 
+export type barrrageTypeGroup = 'default' | 'user'
 export interface BarrageItem {
   id?: number, //弹幕id
   delay?: number, // 当前弹幕运行一屏的时间

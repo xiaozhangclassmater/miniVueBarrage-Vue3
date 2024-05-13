@@ -24,7 +24,7 @@ export default defineConfig({
         rollupOptions: {
           output:{
             // 设置静态资源输出目录
-            assetFileNames: () => 'lib/index.css'
+            assetFileNames: `lib/index.css`,
           },
           external: ['vue'],
         }
@@ -42,10 +42,13 @@ export default defineConfig({
           targets: [
             { src: 'packages/package.json', dest: 'dist/minivuebarrage/' },
             {
-              src: 'README.md', dest: 'dist/minivuebarrage/'
+              src: 'packages/components/minivueBarrage/docs/README.md', dest: 'dist/minivuebarrage/'
+            },
+            {
+              src: 'packages/components/minivueBarrage/index.d.ts', dest: 'dist/minivuebarrage/lib/'
             }
           ],
-        })
+        }),
       ],
       server:{
         host: '0.0.0.0',

@@ -74,11 +74,23 @@ export const buildProps = <T>() => {
       type: String,
       default: '#fec821'
     },
+    //是否默认的背景颜色
+    defaultBgColor: {
+      type: Boolean,
+      default: true
+    },
     // 弹幕高度
     heigth: {
       type: [String , Number],
       default: '35px'
-    }
+    },
+    // // 是否需要默认的操作选项
+    // // 如果传入的是 boolean值 则直接显示或者不显示
+    // // 如果传入的是 Array值 则 你可以传入 ['like' , 'copy'] 如果只存在 like则 显示 点赞 如果只存在 copy 则显示 复制功能  默认都存在
+    // defaultSubOption: {
+    //   type: [Boolean , Array],
+    //   default: true
+    // }
   }
 }
 

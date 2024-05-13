@@ -7,13 +7,17 @@
       :opacity="opacityValue"
       :pausedFlag="barragePaused"
       :createFrequencyTime="times"
-      :delay="12"
+      :delay="10"
       :color="'#000'"
       :bgColor="'#ddd'"
       ref="barrageRef"
       batchDestroy
+      @click="clickHandle"
       @change="changeHandle"
-       >
+      @complete="completeHandle"
+      @mouseenter="mouseenterHandle"
+      @mouseleave="mouseleaveHandle"
+      >
       <template #icon>
         <div class="icon"></div>
       </template>
@@ -72,6 +76,18 @@
 </template>
 
 <script lang="ts" setup>
+export type barrrageTypeGroup = 'default' | 'user'
+export interface BarrageItem {
+  id?: number,
+  delay?: number,
+  iconUrl?: string,
+  content: string,
+  top?: number
+  color?: string,
+  bgColor?: string,
+  index?: number,
+  type?: barrrageTypeGroup
+}
 import { ElMessage as Message } from 'element-plus';
 import { ref } from 'vue';
 import { barrageDatas } from '../../../../mock';
@@ -107,6 +123,18 @@ const resetHandle = () => {
 }
 const clearHandle = () => {
   barrageRef.value?.clear()
+}
+const clickHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target);
+}
+const completeHandle = () => {
+  console.log('弹幕运行完成');
+}
+const mouseenterHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target , item);
+}
+const mouseleaveHandle = (e: MouseEvent , item: object) => {
+  console.log('item' , e.target , item);
 }
 </script>
 
