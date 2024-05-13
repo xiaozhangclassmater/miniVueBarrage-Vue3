@@ -1,7 +1,7 @@
 <template>
-  <div class="barrage-wapper" ref="barrageWapperRef" :style="barrageWapperStyle">
+  <div class="barrage-wapper" :class="bindDynamicClass" ref="barrageWapperRef" :style="barrageWapperStyle">
     <div class="top-barrage-wapper" ref="topWapperRef"></div>
-    <div class="bottom-barrage-wapper" v-if="fullScreen"  ref="bottomWapperRef" ></div>
+    <div v-if="fullScreen" class="bottom-barrage-wapper"   ref="bottomWapperRef" ></div>
   </div>
 </template>
 
@@ -15,7 +15,7 @@ import { randomNumber } from './util';
 export default defineComponent({
   name: 'miniVueBarrage',
   props: buildProps() ,
-  emits: ["update:barrages" , "change" , "complete" , "click"],
+  emits: ["update:modelValue" , "change" , "complete" , "click" , "mouseenter" , "mouseleave"],
   setup(props , { slots , expose , emit}){
     const baseBatchDestoryNum = 50 // 批量删除弹幕数量的基准值
     let curentFinishRunningNum = 0 // 当前弹幕完成运行的总数
@@ -26,6 +26,8 @@ export default defineComponent({
     const bottomWapperRef = ref<HTMLDivElement | null>(null)
     let barrageElement: HTMLDivElement = document.createElement('div')
     let barrageIconElement: HTMLDivElement = document.createElement('div')
+    // 相对 弹幕的 弹层
+    // let relativeBarrageDialog: HTMLDivElement = document.createElement('div')
     const BarrageInstance = new BarrageManager()
     const timerId = ref<any>(null)
     let lastIndex = -1 // 上一次生成的 index
@@ -40,6 +42,7 @@ export default defineComponent({
     const barrageWapperStyle = computed(() => {
       return props.showBarrage ? { display: 'block'} : { display: 'none' }
     })
+    const bindDynamicClass = computed(() => props.defaultBgColor ? 'default-background-color' : '')
     /**
      * @description 通过 js 创建弹幕实例
      * @param itemInstance
@@ -190,16 +193,22 @@ export default defineComponent({
       /**
        *鼠标移入弹幕时 进行弹幕暂停
        */
-      const mouseenterCallback = (e: MouseEvent) => {
-        const currentClickDom = e.target as HTMLDivElement
-        currentClickDom.style.animationPlayState = PLAYSTATEGROUP.PAUSED
+      const mouseenterCallback = async (e: MouseEvent) => {
+        emit('mouseenter' , e , instance)
+        const currentMouseEnterDom = e.target as HTMLDivElement
+        // relativeBarrageDialog.classList.add('subOption-wapper')
+        currentMouseEnterDom.style.animationPlayState = PLAYSTATEGROUP.PAUSED
       }
       const mouseLeaveCallback = (e: MouseEvent) => {
-        const currentClickDom = e.target as HTMLDivElement
-        currentClickDom.style.animationPlayState = PLAYSTATEGROUP.RUNNING
+        emit('mouseleave' , e , instance)
+        const currentMouseLeaveDom = e.target as HTMLDivElement
+        //离开时的移除 副选项元素
+        // const subOptionModalEl = currentMouseLeaveDom.querySelector('.subOption-wapper')
+        // subOptionModalEl && subOptionModalEl?.remove()
+        !props.pausedFlag && (currentMouseLeaveDom.style.animationPlayState = PLAYSTATEGROUP.RUNNING)
       }
       const clickEventCallback = (e: MouseEvent) => {
-        emit('click' , instance)
+        emit('click' , e , instance)
       }
       const animationendCallback = (e: AnimationEvent) => {
         const el = e.target as HTMLElement
@@ -220,7 +229,7 @@ export default defineComponent({
       barrageElement.addEventListener('click' , clickEventCallback)
     }
 
-    const setElementAttrs = (instance :BarrageItem) => {
+    const setElementAttrs = (instance: BarrageItem) => {
       // 如果每个icon链接存在证明需要显示icon
       if(instance.iconUrl && props.iconUrlInShow) {
         barrageIconElement.classList.add('iconLink-style') // 添加链接形式Icon的类名样式
@@ -343,6 +352,7 @@ export default defineComponent({
       barrageWapperRef,
       topWapperRef,
       bottomWapperRef,
+      bindDynamicClass,
       create,
       reset,
       clear,
@@ -362,12 +372,21 @@ export default defineComponent({
     transform: translateX(var(--wapperClientWidth));
   }
 }
-
+// @keyframes subOptionModal {
+//   from{
+//     width: 0;
+//   }
+//   to{
+//     width: 150px;
+//   }
+// }
+.default-background-color{
+  background-image: -webkit-linear-gradient(315deg, #42d392 25%, #647eff);
+}
 .barrage-wapper{
   position: relative;
   width: 100%;
   height: 600px;
-  background-image: -webkit-linear-gradient(315deg, #42d392 25%, #647eff);
   padding: 20px 0px;
   overflow: hidden;
 
@@ -407,5 +426,30 @@ export default defineComponent({
       background-size: 100% 100%;
     }
   }
+  // .subOption-wapper{
+  //   position: absolute;
+  //   width: 150px;
+  //   height: 40px;
+  //   border-radius: 20px;
+  //   z-index: 10;
+  //   top: -51px;
+  //   background-color: rgba(0, 0, 0, .3);
+  //   transition: all .3s;
+  //   animation: subOptionModal linear .3s ;
+  //   &::after{
+  //     content: '';
+  //     display: inline-block;
+  //     position: absolute;
+  //     bottom: -20px;
+  //     left: 42%;
+  //     transform: translateX(-50px);
+  //     border-top: 10px solid transparent;
+  //     border-right: 10px solid transparent;
+  //     border-left: 10px solid transparent;
+  //     border-bottom: 10px solid rgba(0, 0, 0 , .3);
+  //     transform: rotate(180deg)
+  //   }
+
+  // }
 }
 </style>

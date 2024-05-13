@@ -15,7 +15,9 @@
       @click="clickHandle"
       @change="changeHandle"
       @complete="completeHandle"
-       >
+      @mouseenter="mouseenterHandle"
+      @mouseleave="mouseleaveHandle"
+      >
       <template #icon>
         <div class="icon"></div>
       </template>
@@ -110,11 +112,17 @@ const resetHandle = () => {
 const clearHandle = () => {
   barrageRef.value?.clear()
 }
-const clickHandle = (item) => {
+const clickHandle = (e , item) => {
   console.log('item' , item);
 }
 const completeHandle = () => {
   console.log('弹幕运行完成');
+}
+const mouseenterHandle = () => {
+
+}
+const mouseleaveHandle = () => {
+
 }
 </script>
 
