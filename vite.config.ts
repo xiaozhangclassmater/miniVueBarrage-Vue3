@@ -46,6 +46,9 @@ export default defineConfig({
             },
             {
               src: 'packages/components/minivueBarrage/index.d.ts', dest: 'dist/minivuebarrage/lib/'
+            },
+            {
+              src: 'packages/components/minivueBarrage/index.d.ts', dest: 'dist/minivuebarrage/es/'
             }
           ],
         }),

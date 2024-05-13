@@ -92,16 +92,24 @@ const barrages = ref([])
 ~~~vue
 <template>
   <div class="panel-wapper">
-    <miniVueBarrage v-model="barrages"
+        <miniVueBarrage
+      v-model="barrages"
       :fullScreen="fullScreenSwitch"
       :showBarrage="showBarrage"
       :opacity="opacityValue"
       :pausedFlag="barragePaused"
       :createFrequencyTime="times"
+      :delay="10"
       :color="'#000'"
       :bgColor="'#ddd'"
       ref="barrageRef"
-      @change="changeHandle">
+      batchDestroy
+      @click="clickHandle"
+      @change="changeHandle"
+      @complete="completeHandle"
+      @mouseenter="mouseenterHandle"
+      @mouseleave="mouseleaveHandle"
+      >
       <template #icon>
         <div class="icon"></div>
       </template>
@@ -207,12 +215,17 @@ const mouseleaveHandle = (e: MouseEvent , item: object) => {
 
 ### Events
 
-| 事件名称 | 说明                           |                         |
-| -------- | ------------------------------ | ----------------------- |
-| change   | 弹幕每次创建或者发生改变时触发 | (params : object) => {} |
-| complete | 弹幕所有数据运行完成触发       | ()  => {}               |
+| 事件名称   | 说明                               |                               |
+| ---------- | ---------------------------------- | ----------------------------- |
+| change     | 弹幕每次创建或者发生改变时触发     | (params : object) => {}       |
+| complete   | 弹幕所有数据运行完成触发           | ()  => {}                     |
+| click      | 点击某个弹幕触发的事件             | (e , item: BarrageItem) => {} |
+| mouseenter | 鼠标移入某个弹幕的身上时触发该事件 | (e , item: BarrageItem) => {} |
+| mouseleave | 鼠标移出某个弹幕的身上时触发该事件 | (e , item: BarrageItem) => {} |
 
 ### instance methods
+
+#### instance dataTyps
 
 ~~~ts
 export type barrrageTypeGroup = 'default' | 'user'

@@ -5,6 +5,7 @@
   "description": "minivuebarrage is a lightweight barrage component that supports rich features such as adjusting the opacity color of the barrage",
   "main": "./lib/index.js",
   "module": "./es/index.mjs",
+  "types": "./lib/index.d.ts",
   "author": {
     "name": "xiaozhang",
     "url": "https://github.com/xiaozhangclassmater"
