@@ -234,8 +234,9 @@ MIT
 
  minivuebarrage , barrage , 弹幕 vuebarrage vueBarrage , BARRAGE
 
-### 联系我们
 
-喜欢学习的朋友，可以加我微信，进入我们的内部群，一起学习，备注 进群。
+### 关于我
 
-![alt text](./src/assets/d79b6c304ade99558256a9cc9541276.jpg)
+你可以添加我的微信，加入我们的群聊，一起收获更多的前端知识。
+
+![weChat](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f5dfe1fb24ac4f68a440a991f2fc7a75~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.awebp)

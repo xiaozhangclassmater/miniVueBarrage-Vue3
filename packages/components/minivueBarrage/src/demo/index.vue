@@ -101,7 +101,7 @@ const showBarrage = ref(true)
 const barragePaused = ref(false)
 const barrageContent = ref('')
 const curRenderCount = ref(0)
-const times = ref(1)
+const times = ref(0.1)
 const addHandle = () => {
   if(!barrageContent.value){
     return Message.warning("内容不能为空")
