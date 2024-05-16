@@ -222,6 +222,9 @@ export default defineComponent({
         if(curentFinishRunningNum === baseBatchDestoryNum || (cacheBarrageRenderNum - finishBatchDestroyNum < baseBatchDestoryNum)){
           batchRemoveBarrageEl()
         }
+        if(curentFinishRunningNum === cacheBarrageRenderNum){
+          emit('complete') // 弹幕运行完成 发射事件
+        }
       }
       barrageElement.addEventListener('mouseenter' , mouseenterCallback)
       barrageElement.addEventListener('mouseleave' , mouseLeaveCallback)
@@ -298,7 +301,7 @@ export default defineComponent({
       const IntervalCallback = () => {
         if(curCreateIndex === renders.length){
           //运行完一屏 触发 complete 事件
-          emit('complete')
+          // emit('complete')
           return clearInterval(timerId.value)
         }
         currentRowIndex = calcAppendLineIndex()
@@ -386,7 +389,8 @@ export default defineComponent({
 .barrage-wapper{
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 100vh;
+  box-sizing: border-box;
   padding: 20px 0px;
   overflow: hidden;
 
