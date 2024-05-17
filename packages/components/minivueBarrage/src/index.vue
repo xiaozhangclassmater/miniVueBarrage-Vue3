@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, render, watch } from 'vue';
+import { computed, defineComponent, onActivated, onDeactivated, onMounted, onUnmounted, ref, render, watch } from 'vue';
 import { denounce, errorCatchCallHandle, getStyleValue, isEmpty, unitToValue, useExpose } from '../../../utils';
 import { CSSKEY, KEYGROUP, PLAYSTATEGROUP } from './constant';
 import { BarrageManager, buildProps } from './Factory';
@@ -222,6 +222,9 @@ export default defineComponent({
         if(curentFinishRunningNum === baseBatchDestoryNum || (cacheBarrageRenderNum - finishBatchDestroyNum < baseBatchDestoryNum)){
           batchRemoveBarrageEl()
         }
+        if(curentFinishRunningNum === cacheBarrageRenderNum){
+          emit('complete') // 弹幕运行完成 发射事件
+        }
       }
       barrageElement.addEventListener('mouseenter' , mouseenterCallback)
       barrageElement.addEventListener('mouseleave' , mouseLeaveCallback)
@@ -298,7 +301,7 @@ export default defineComponent({
       const IntervalCallback = () => {
         if(curCreateIndex === renders.length){
           //运行完一屏 触发 complete 事件
-          emit('complete')
+          // emit('complete')
           return clearInterval(timerId.value)
         }
         currentRowIndex = calcAppendLineIndex()
@@ -319,6 +322,7 @@ export default defineComponent({
       loopCreate()
     }
     const lcMountedCallback = () => _init()
+    const lcUnmountedCallback = () => clearData()
     const barragesWatchCallback = (newVal:BarrageItem[]) => {
        // 如果 没有弹幕 则 不操作
        if(!newVal?.length){
@@ -346,6 +350,8 @@ export default defineComponent({
     watch(() => props.showBarrage , showBarrageWatchCallback)
     watch(() => props.fullScreen , fullScreenWatchCallback)
     onMounted(lcMountedCallback)
+    onUnmounted(lcUnmountedCallback)
+    onDeactivated(lcUnmountedCallback)
     expose(useExpose())
     return {
       barrageWapperStyle,
@@ -386,7 +392,8 @@ export default defineComponent({
 .barrage-wapper{
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 100vh;
+  box-sizing: border-box;
   padding: 20px 0px;
   overflow: hidden;
 
