@@ -1,5 +1,3 @@
-class Barrage {
+class Barrage {}
 
-}
-
-export default Barrage
+export default Barrage;

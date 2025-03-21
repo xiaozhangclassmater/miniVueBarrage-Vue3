@@ -1,19 +1,25 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 
 const router = createRouter({
   history: createWebHistory(),
-  routes:[
+  routes: [
     {
-      path: '/',
-      redirect: '/miniVueVBarrage'
+      path: "/",
+      redirect: "/miniVueVBarrage",
     },
     {
-      path: '/miniVueVBarrage',
-      name: 'miniVueVBarrage',
-      component: () => import('@p/components/minivueBarrage/src/demo/index.vue') // packages
-      // component: () => import('@/views/payGround/index.vue')
-    }
-  ]
-})
+      path: "/miniVueVBarrage",
+      name: "miniVueVBarrage",
+      // component: () => import('@p/components/minivueBarrage/src/demo/index.vue') // packages
+      component: () => import("@/views/payGround/index.vue"),
+    },
+    {
+      path: "/pdfToCanvas",
+      name: "pdfToCanvas",
+      // component: () => import('@p/components/minivueBarrage/src/demo/index.vue') // packages
+      component: () => import("@/views/vuePdfToCanvas/index.vue"),
+    },
+  ],
+});
 
-export default router
+export default router;
