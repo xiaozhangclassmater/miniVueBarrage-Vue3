@@ -91,3 +91,25 @@ export function isEmpty(val: any) {
     typeof val === null || !val || (Array.isArray(val) && !val.length) || !Object.keys(val)?.length
   );
 }
+// 是否为异步函数
+export function isAsyncFunction(func: Function) {
+  return func && func.constructor && func.constructor.name === "AsyncFunction";
+}
+/**
+ * 将 Blob 转换为 ArrayBuffer
+ */
+export const blobToArrayBuffer = (blob: Blob) => {
+  return new Promise((resolve: (data: Uint8Array<ArrayBuffer>) => void, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const arrayBuffer = reader.result;
+      resolve(new Uint8Array(arrayBuffer as any));
+    };
+    reader.onerror = () => reject(new Error("Failed to read blob as ArrayBuffer"));
+    reader.readAsArrayBuffer(blob);
+  });
+};
+
+export const base64ToBytes = (base64: string) => {
+  return Uint8Array.from(window.atob(base64), (m: any) => m.codePointAt(0));
+};

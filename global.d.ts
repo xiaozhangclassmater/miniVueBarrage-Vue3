@@ -3,3 +3,4 @@ declare module 'miniVueBarrage' {
     miniVueBarrage: typeof import('./packages/components/minivueBarrage/index')
   }
 }
+

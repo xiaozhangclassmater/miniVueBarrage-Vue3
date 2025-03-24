@@ -18,8 +18,10 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.19",
+    "axios": "^1.8.4",
     "element-plus": "^2.7.1",
     "normalize.css": "^8.0.1",
+    "pdfjs-dist": "^4.10.38",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5"
   },

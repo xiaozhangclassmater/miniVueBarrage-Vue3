@@ -7,7 +7,7 @@ function install(app: App) {
   const components = [miniVueBarrage, vuePdfToCanvas];
   components.forEach((item) => (item.install ? app.use(item) : app.component(item.name, item)));
 }
-export { miniVueBarrage };
+export { miniVueBarrage, vuePdfToCanvas };
 
 export default {
   install,
