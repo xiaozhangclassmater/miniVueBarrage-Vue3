@@ -41,6 +41,7 @@ export function errorCatchCallHandle(errorMesssage: string, type: ErrorType = "w
       break;
     case "log":
       console.log(errorMesssage);
+    // eslint-disable-next-line no-fallthrough
     default:
       break;
   }
